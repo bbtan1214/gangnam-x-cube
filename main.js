@@ -199,12 +199,16 @@ function animate() {
         const side = new THREE.Vector3().crossVectors(camera.up, moveDir).normalize();
         
         if (keys.w || keys.s || keys.a || keys.d) {
-            // Synchronously move both to prevent OrbitControls fighting back
+            controls.enabled = false; // TEMPORARILY DISABLE TO PREVENT FIGHTING
             if (keys.w) { camera.position.addScaledVector(moveDir, speed); controls.target.addScaledVector(moveDir, speed); }
             if (keys.s) { camera.position.addScaledVector(moveDir, -speed); controls.target.addScaledVector(moveDir, -speed); }
             if (keys.a) { camera.position.addScaledVector(side, speed); controls.target.addScaledVector(side, speed); }
             if (keys.d) { camera.position.addScaledVector(side, -speed); controls.target.addScaledVector(side, -speed); }
+        } else {
+            controls.enabled = true; // RE-ENABLE WHEN NOT MOVING
         }
+    } else {
+        controls.enabled = true; // ALWAYS ENABLE IN ISO
     }
 
     if (controls) controls.update();
