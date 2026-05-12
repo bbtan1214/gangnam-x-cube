@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notice | GANGNAM X CUBE</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js"
+      }
+    }
+    </script>
+    <style>
+        .notice-wrapper { max-width: 1000px; margin: 150px auto 100px; padding: 0 40px; }
+        .notice-page-title { 
+            font-family: 'Fraunces', serif; 
+            font-size: 3.5rem; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            letter-spacing: -0.02em;
+        }
+        .notice-page-subtitle {
+            text-align: center;
+            color: #999;
+            font-size: 0.85rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 100px;
+        }
+
+        .notice-list-container { border-top: 1px solid #000; }
+        
+        /* Notice Item Design */
+        .notice-entry { border-bottom: 1px solid #eee; transition: background 0.3s; }
+        .notice-entry:hover { background: #fafafa; }
+        
+        .notice-header-bar { 
+            padding: 40px 0; 
+            cursor: pointer; 
+            display: grid; 
+            grid-template-columns: 120px 1fr 40px; 
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .notice-date { font-size: 0.9rem; color: #bbb; font-weight: 400; font-family: 'Fraunces', serif; }
+        .notice-title-box { display: flex; align-items: center; gap: 15px; }
+        .notice-title { font-size: 1.2rem; font-weight: 500; color: #111; letter-spacing: -0.01em; }
+        
+        .urgent-tag { 
+            background: #000; color: #fff; padding: 4px 12px; 
+            font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; 
+            border-radius: 0;
+        }
+
+        /* Accordion Content */
+        .notice-body { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+            background: #fff;
+        }
+        .notice-entry.active .notice-body { 
+            max-height: 1200px; 
+            padding: 40px 0 60px 140px; 
+        }
+        .notice-content-inner {
+            max-width: 700px;
+            line-height: 2;
+            color: #555;
+            font-size: 1.05rem;
+            word-break: keep-all;
+        }
+
+        .notice-chevron { 
+            width: 8px; height: 8px; 
+            border-right: 1px solid #000; border-bottom: 1px solid #000; 
+            transform: rotate(45deg); transition: transform 0.4s; 
+            margin-left: auto;
+        }
+        .notice-entry.active .notice-chevron { transform: rotate(-135deg); }
+
+        @media (max-width: 768px) {
+            .notice-header-bar { grid-template-columns: 1fr 40px; }
+            .notice-date { grid-column: 1 / 3; margin-bottom: -10px; }
+            .notice-entry.active .notice-body { padding: 20px; }
+            .notice-page-title { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="logo-container" onclick="location.href='index.html'" style="cursor: pointer;">
+            <h1 class="logo-title">GANGNAM<br>X CUBE</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="index.html">공간 안내</a></li>
+                <li><a href="3d_view.html">3D 공간 뷰어</a></li>
+                <li><a href="rental.html">대관 신청</a></li>
+                <li><a href="contact.html">CONTACT</a></li>
+                <li class="active"><a href="notice.html">공지사항</a></li>
+            </ul>
+        </nav>
+        <div class="header-right">
+            <div class="mobile-menu-btn" id="mobile-menu-toggle">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="notice-wrapper">
+        <h2 class="notice-page-title">Notice</h2>
+        <p class="notice-page-subtitle">Announcements & Updates</p>
+        
+        <div class="notice-list-container" id="public-notice-list">
+            <!-- Rendered by main.js -->
+            <div style="text-align: center; padding: 100px; color: #ccc; letter-spacing: 0.1em; font-size: 0.8rem;">
+                LOADING ARCHIVES...
+            </div>
+        </div>
+    </div>
+
+    <footer style="padding: 100px 40px; background: #fff; border-top: 1px solid #eee; margin-top: 100px;">
+        <div style="max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h1 style="font-size: 1.4rem; line-height: 1.1; margin-bottom: 25px;">GANGNAM<br>X CUBE</h1>
+                <p style="font-size: 0.75rem; color: #bbb; letter-spacing: 0.05em;">© 2026 GANGNAM X CUBE. ALL RIGHTS RESERVED.</p>
+            </div>
+            <div style="text-align: right; font-size: 0.85rem; line-height: 2.2; color: #666;">
+                <p>서울시 서초구 서초대로 397 부띠크모나코 B1</p>
+                <p>T. 02-535-5875 | E. museum@bmm.kr</p>
+                <a href="admin/login.html" style="color: #000; text-decoration: underline; font-weight: 600;">MANAGEMENT LOGIN</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="main.js?v=42"></script>
+</body>
+</html>

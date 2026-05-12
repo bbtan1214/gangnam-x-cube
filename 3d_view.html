@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 공간 뷰어 | GANGNAM X CUBE</title>
+    <!-- Fonts & Libraries -->
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js"
+      }
+    }
+    </script>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+        #canvas-container { width: 100%; height: 100vh; background: #eee; }
+        
+        .side-menu { position: fixed; top: 50%; transform: translateY(-50%); z-index: 100; display: flex; flex-direction: column; gap: 15px; }
+        .side-menu.left { left: 30px; }
+        .side-menu.right { right: 30px; }
+        
+        .side-menu.bottom-right { bottom: 30px; top: auto; right: 30px; transform: none; }
+        
+        .menu-btn { 
+            width: 50px; height: 50px; background: rgba(255, 255, 255, 0.9); border: 1px solid #000; 
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem; font-weight: 700; cursor: pointer; transition: all 0.3s;
+            backdrop-filter: blur(10px); text-align: center; line-height: 1.2;
+            padding: 5px; box-sizing: border-box;
+        }
+        .menu-btn:hover, .menu-btn.active { background: #000; color: #fff; }
+
+        .control-guide {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: #fff; padding: 12px 30px; border-radius: 4px;
+            font-size: 0.75rem; pointer-events: none; backdrop-filter: blur(5px);
+            display: flex; gap: 25px; z-index: 1000; letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body class="page-3d">
+    <header class="site-header">
+        <div class="logo-container" onclick="location.href='index.html'" style="cursor: pointer;">
+            <h1 class="logo-title">GANGNAM<br>X CUBE</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="index.html">공간 안내</a></li>
+                <li class="active"><a href="3d_view.html">3D 공간 뷰어</a></li>
+                <li><a href="rental.html">대관 신청</a></li>
+                <li><a href="contact.html">CONTACT</a></li>
+                <li><a href="notice.html">공지사항</a></li>
+            </ul>
+        </nav>
+        <div class="header-right">
+            <div class="mobile-menu-btn" id="mobile-menu-toggle">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Nav -->
+    <nav class="mobile-nav-overlay" id="mobile-nav">
+        <button class="close-btn" id="btn-close-mobile-nav">&times;</button>
+        <ul>
+            <li><a href="index.html">공간 안내</a></li>
+            <li><a href="3d_view.html">3D 공간 뷰어</a></li>
+            <li><a href="rental.html">대관 신청</a></li>
+            <li><a href="contact.html">CONTACT</a></li>
+            <li><a href="notice.html">공지사항</a></li>
+        </ul>
+    </nav>
+
+    <div id="canvas-container"></div>
+
+    <!-- View Mode Menu -->
+    <div class="side-menu left">
+        <div class="menu-btn active" id="btn-iso">ISO</div>
+        <div class="menu-btn" id="btn-fpv">FPV</div>
+    </div>
+
+    <!-- Hall Selection Menu -->
+    <div class="side-menu right">
+        <div class="menu-btn active" id="btn-hall-total" onclick="hallNav('total')">ALL</div>
+        <div class="menu-btn" id="btn-hall-a" onclick="hallNav('A')">HALL A</div>
+        <div class="menu-btn" id="btn-hall-b" onclick="hallNav('B')">HALL B</div>
+        <div class="menu-btn" id="btn-hall-c" onclick="hallNav('C')">HALL C</div>
+    </div>
+
+    <!-- Fullscreen Toggle -->
+    <div class="side-menu bottom-right">
+        <div class="menu-btn" id="btn-fullscreen">FULL<br>SCREEN</div>
+    </div>
+
+    <div class="control-guide">
+        <span>WASD: MOVE</span>
+        <span>LEFT CLICK DRAG: ROTATE</span>
+        <span>RIGHT CLICK DRAG: PAN</span>
+    </div>
+
+    <script type="module" src="main.js?v=41"></script>
+</body>
+</html>

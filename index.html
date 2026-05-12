@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GANGNAM X CUBE | 강남 하이엔드 이벤트 & 전시 베뉴</title>
+    <meta name="description" content="강남 부띠크모나코 B1에 위치한 하이엔드 이벤트 베뉴 GANGNAM X CUBE. Grand Hall, Reception Hall, Studio Hall 등 차별화된 공간과 3D 시뮬레이션을 통한 혁신적인 대관 경험을 제공합니다.">
+    <meta name="keywords" content="강남 대관, 강남 이벤트 베뉴, 강남 전시장, 강남 팝업스토어, 부띠크모나코 대관, GANGNAM X CUBE, 강남 큐브, 대관 신청, 전시 공간">
+    <meta name="author" content="GANGNAM X CUBE">
+    
+    <!-- Open Graph / SNS Sharing -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost:8080/index.html">
+    <meta property="og:title" content="GANGNAM X CUBE | 하이엔드 이벤트 베뉴">
+    <meta property="og:description" content="강남의 중심, 부띠크모나코에서 만나는 프리미엄 이벤트 공간. 지금 바로 3D 가상 투어로 확인하세요.">
+    <meta property="og:image" content="main_grandhall.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="http://localhost:8080/index.html">
+    <meta property="twitter:title" content="GANGNAM X CUBE | 하이엔드 이벤트 베뉴">
+    <meta property="twitter:description" content="강남의 중심, 부띠크모나코에서 만나는 프리미엄 이벤트 공간.">
+    <meta property="twitter:image" content="main_grandhall.jpg">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js"
+      }
+    }
+    </script>
+    <style>
+        /* Image Modal Overlay */
+        .image-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); z-index: 10000; 
+            display: none; align-items: center; justify-content: center;
+        }
+        .image-modal-overlay img { max-width: 90%; max-height: 90%; box-shadow: 0 0 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+        .modal-close { position: absolute; top: 30px; right: 40px; color: #fff; font-size: 3rem; cursor: pointer; z-index: 10001; }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="logo-container" onclick="location.href='index.html'" style="cursor: pointer;">
+            <h1 class="logo-title">GANGNAM<br>X CUBE</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li class="active"><a href="index.html">공간 안내</a></li>
+                <li><a href="3d_view.html">3D 공간 뷰어</a></li>
+                <li><a href="rental.html">대관 신청</a></li>
+                <li><a href="contact.html">CONTACT</a></li>
+                <li><a href="notice.html">공지사항</a></li>
+            </ul>
+        </nav>
+        <div class="header-right">
+            <div class="mobile-menu-btn" id="mobile-menu-toggle">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 1. Hero Section (Static Image) -->
+    <section class="main-hero" style="position: relative; width: 100%; height: 85vh; background: url('main_grandhall.jpg') no-repeat center center/cover; margin-top: -80px; display: flex; align-items: center; justify-content: center;">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3);"></div>
+        <div style="position: relative; z-index: 5; text-align: center; color: #fff;">
+            <h2 style="font-family: 'Fraunces', serif; font-size: 6vw; letter-spacing: 0.1em; text-shadow: 0 10px 30px rgba(0,0,0,0.5);">GANGNAM X CUBE</h2>
+            <p style="font-size: 0.8rem; letter-spacing: 0.5em; opacity: 0.8; margin-top: 20px;">HIGH-END EVENT VENUE</p>
+        </div>
+    </section>
+
+    <!-- 2. Introduction -->
+    <section class="intro-section" style="padding: 120px 20px; text-align: center; background: #fff;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <h3 style="font-family: 'Fraunces', serif; font-size: 1.4rem; letter-spacing: 0.15em; margin-bottom: 50px;">
+                B1 MUSEUM, BOUTIQUE MONACO
+                <span style="display: block; width: 40px; height: 1px; background: #000; margin: 30px auto 0;"></span>
+            </h3>
+            <p style="font-size: 1.4rem; font-weight: 700; line-height: 1.6; margin-bottom: 40px; word-break: keep-all;">
+                강남 중심가 336평 대형 대관, GANGNAM X CUBE는<br>기업 행사와 산업 전시에 특화된 하이엔드 이벤트 베뉴입니다.
+            </p>
+            <p style="color: #666; line-height: 2; font-size: 1.05rem; word-break: keep-all;">
+                부띠크모나코의 미학적 건축물이 주는 상징성과 넓은 오픈 플랜 구조는 컨퍼런스, 브랜드 런칭, 아트 페어 등 대규모 이벤트 기획에 최적화된 환경을 제공합니다.<br>
+                독보적인 규모와 압도적 접근성을 갖춘 공간에서 귀사의 비즈니스 이벤트를 성공적으로 개최하십시오.
+            </p>
+        </div>
+    </section>
+
+    <!-- 3. Floor Plan -->
+    <section class="plan-section" style="padding: 100px 20px; background: #fafafa; text-align: center;">
+        <div style="max-width: 1000px; margin: 0 auto;">
+            <h3 style="font-family: 'Fraunces', serif; font-size: 2.2rem; margin-bottom: 60px;">Floor Plan</h3>
+            <div style="cursor: zoom-in;" onclick="window.openImageModal('main_plan.png.png')">
+                <img src="main_plan.png.png" style="width: 100%; max-width: 800px; border: 1px solid #eee;">
+            </div>
+            <p style="margin-top: 20px; font-size: 0.8rem; color: #999;">* 이미지를 클릭하면 크게 볼 수 있습니다.</p>
+        </div>
+    </section>
+
+    <!-- 4. Specifications -->
+    <section class="spec-section" style="padding: 120px 20px; background: #fff;">
+        <div style="max-width: 1100px; margin: 0 auto;">
+            <h3 style="font-family: 'Fraunces', serif; font-size: 2.2rem; margin-bottom: 60px; text-align: center;">Specifications</h3>
+            <table style="width: 100%; border-collapse: collapse; border-top: 2px solid #000;">
+                <thead>
+                    <tr style="background: #fafafa; border-bottom: 1px solid #eee;">
+                        <th style="padding: 25px; text-align: left; font-size: 0.8rem; color: #999;">SPACE</th>
+                        <th style="padding: 25px; text-align: left; font-size: 0.8rem; color: #999;">AREA (㎡)</th>
+                        <th style="padding: 25px; text-align: left; font-size: 0.8rem; color: #999;">수용인원(예상)</th>
+                        <th style="padding: 25px; text-align: left; font-size: 0.8rem; color: #999;">HEIGHT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 30px 25px;"><strong>Grand Hall (A)</strong></td>
+                        <td style="padding: 30px 25px;">284㎡ (86평)</td>
+                        <td style="padding: 30px 25px;">Max 250명</td>
+                        <td style="padding: 30px 25px;">5.0m</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 30px 25px;"><strong>Reception Hall (B)</strong></td>
+                        <td style="padding: 30px 25px;">205㎡ (62평)</td>
+                        <td style="padding: 30px 25px;">Max 100명</td>
+                        <td style="padding: 30px 25px;">3.5m</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 30px 25px;"><strong>Studio Hall (C)</strong></td>
+                        <td style="padding: 30px 25px;">280㎡ (85평)</td>
+                        <td style="padding: 30px 25px;">Max 150명</td>
+                        <td style="padding: 30px 25px;">3.2m</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 5. Archives -->
+    <section class="gallery-section" style="padding: 120px 20px; background: #fafafa;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h3 style="font-family: 'Fraunces', serif; font-size: 2.2rem; margin-bottom: 60px; text-align: center;">Archives</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
+                <div style="height: 400px; overflow: hidden; cursor: zoom-in;" onclick="window.openImageModal('event_1.jpg')">
+                    <img src="event_1.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="height: 400px; overflow: hidden; cursor: zoom-in;" onclick="window.openImageModal('event_2.jpg')">
+                    <img src="event_2.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="height: 400px; overflow: hidden; cursor: zoom-in;" onclick="window.openImageModal('event_3.jpg')">
+                    <img src="event_3.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="height: 400px; overflow: hidden; cursor: zoom-in;" onclick="window.openImageModal('event_4.jpg')">
+                    <img src="event_4.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="height: 400px; overflow: hidden; cursor: zoom-in;" onclick="window.openImageModal('event_5.jpg')">
+                    <img src="event_5.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer style="padding: 80px 20px; background: #fff; border-top: 1px solid #eee;">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between;">
+            <div>
+                <h1 style="font-size: 1.5rem; margin-bottom: 20px;">GANGNAM<br>X CUBE</h1>
+                <p style="font-size: 0.8rem; color: #999;">© 2026 GANGNAM X CUBE. All rights reserved.</p>
+                <a href="privacy.html" style="font-size: 0.75rem; color: #bbb; text-decoration: underline; margin-top: 10px; display: inline-block;">개인정보처리방침</a>
+            </div>
+            <div style="text-align: right; font-size: 0.85rem; line-height: 2;">
+                <p>서울시 서초구 서초대로 397 부띠크모나코 B1</p>
+                <p>T. 02-535-5875 | E. museum@bmm.kr</p>
+                <a href="admin/login.html" style="color: #000; text-decoration: underline;">관리자 로그인</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="main.js?v=42"></script>
+</body>
+</html>

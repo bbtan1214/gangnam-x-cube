@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONTACT | GANGNAM X CUBE</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js"
+      }
+    }
+    </script>
+    <style>
+        .contact-container { max-width: 1200px; margin: 120px auto 80px; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+        .contact-info h2 { font-family: 'Fraunces', serif; font-size: 3rem; margin-bottom: 40px; }
+        .info-list { list-style: none; padding: 0; }
+        .info-item { margin-bottom: 40px; }
+        .info-item label { display: block; font-size: 0.75rem; letter-spacing: 0.2em; color: #999; text-transform: uppercase; margin-bottom: 15px; }
+        .info-item p { font-size: 1.1rem; line-height: 1.6; font-weight: 500; }
+        
+        .map-box { width: 100%; height: 500px; background: #eee; border-radius: 8px; overflow: hidden; }
+        .map-box iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="logo-container" onclick="location.href='index.html'" style="cursor: pointer;">
+            <h1 class="logo-title">GANGNAM<br>X CUBE</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="index.html">공간 안내</a></li>
+                <li><a href="3d_view.html">3D 공간 뷰어</a></li>
+                <li><a href="rental.html">대관 신청</a></li>
+                <li class="active"><a href="contact.html">CONTACT</a></li>
+                <li><a href="notice.html">공지사항</a></li>
+            </ul>
+        </nav>
+        <div class="header-right">
+            <div class="mobile-menu-btn" id="mobile-menu-toggle">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Overlay -->
+    <nav class="mobile-nav-overlay" id="mobile-nav">
+        <button class="close-btn" id="btn-close-mobile-nav">&times;</button>
+        <ul>
+            <li><a href="index.html">공간 안내</a></li>
+            <li><a href="3d_view.html">3D 공간 뷰어</a></li>
+            <li><a href="rental.html">대관 신청</a></li>
+            <li><a href="contact.html">CONTACT</a></li>
+            <li><a href="notice.html">공지사항</a></li>
+        </ul>
+    </nav>
+
+    <div class="contact-container">
+        <div class="contact-info">
+            <h2>Get in Touch</h2>
+            <div class="info-list">
+                <div class="info-item">
+                    <label>Address</label>
+                    <p id="contact-address">서울특별시 서초구 서초대로 397 부티크 모나코 (B1 뮤지엄)</p>
+                    <p id="contact-address-en" style="font-size: 0.9rem; color: #888; margin-top: 5px;">B1 Museum, Boutique Monaco, 397, Seocho-daero, Seocho-gu, Seoul, Korea</p>
+                </div>
+                <div class="info-item">
+                    <label>Contact</label>
+                    <p>Tel: <span id="contact-phone">02-535-5875</span></p>
+                    <p>Email: <span id="contact-email">museum@bmm.kr</span></p>
+                </div>
+                <div class="info-item">
+                    <label>Business Hours</label>
+                    <p id="contact-hours">Weekdays / 09:30 AM ~ 06:30 PM<br>Weekends & Holidays / Closed</p>
+                </div>
+            </div>
+        </div>
+        <div class="map-box">
+            <!-- Google Maps Embed for Boutique Monaco -->
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3164.78656113645!2d127.02345531531046!3d37.49645297981033!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ca159f8a37943%3A0x6b8763529a67a070!2z67aA7Yuw7YGsIOunqOuCmOydmA!5e0!3m2!1sko!2skr!4v1683870000000!5m2!1sko!2skr" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+    </div>
+
+    <script type="module" src="main.js?v=40"></script>
+</body>
+</html>

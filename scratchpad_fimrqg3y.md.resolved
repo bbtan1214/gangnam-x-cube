@@ -1,0 +1,9 @@
+# Verification Plan - Mobile Responsive Design (480x800)
+
+- [x] Navigate to http://localhost:8000/
+- [x] Resize window to 480x800 (Note: actual viewport reported as 625x881)
+- [x] Verify GNB links are hidden/collapsed: GNB links are hidden; hamburger icon is present.
+- [x] Verify Hamburger button is present: Found at top right.
+- [x] Verify Side menus (Quick-Menus) moved to the bottom: Verified via JS; fixed at bottom: 180px with horizontal layout (flex-direction: row).
+- [x] Verify Search bar is stacked vertically: Verified in screenshot (Rent Start/End stacked).
+- [x] Final summary of findings

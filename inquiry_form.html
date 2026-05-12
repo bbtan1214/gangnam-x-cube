@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상세 정보 입력 | GANGNAM X CUBE</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .inquiry-form-container { max-width: 700px; margin: 120px auto 80px; padding: 0 20px; }
+        .form-card { background: #fff; padding: 50px; border: 1px solid #eee; border-radius: 12px; }
+        .form-header { margin-bottom: 40px; border-bottom: 1px solid #000; padding-bottom: 20px; }
+        .form-header h2 { font-family: 'Fraunces', serif; font-size: 1.8rem; }
+        
+        .selected-summary { background: #f8f8f8; padding: 20px; border-radius: 4px; margin-bottom: 40px; font-size: 0.9rem; color: #555; }
+        
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+        .input-group { margin-bottom: 25px; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: #333; }
+        .input-group input, .input-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; outline: none; }
+        .input-group textarea { height: 120px; resize: none; }
+        
+        .submit-btn { 
+            width: 100%; background: #000; color: #fff; padding: 20px; border: none; 
+            font-weight: 700; cursor: pointer; font-size: 1rem; border-radius: 4px;
+        }
+        .privacy-box { 
+            margin-bottom: 25px; padding: 20px; background: #f9f9f9; border: 1px solid #eee; 
+            font-size: 0.8rem; line-height: 1.6; color: #666;
+        }
+        .consent-check { display: flex; align-items: center; gap: 10px; margin-top: 15px; font-weight: 700; color: #333; }
+        .consent-check input { width: 18px; height: 18px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="logo-container" onclick="location.href='index.html'" style="cursor: pointer;">
+            <h1 class="logo-title">GANGNAM<br>X CUBE</h1>
+        </div>
+    </header>
+
+    <div class="inquiry-form-container">
+        <div class="form-card">
+            <div class="form-header">
+                <h2>Inquiry Form</h2>
+            </div>
+
+            <div id="selected-summary" class="selected-summary">
+                로딩 중...
+            </div>
+
+            <form id="final-inquiry-form">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>성함 *</label>
+                        <input type="text" id="user-name" required>
+                    </div>
+                    <div class="input-group">
+                        <label>회사명/단체명 *</label>
+                        <input type="text" id="user-company" required>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>이메일 *</label>
+                        <input type="email" id="user-email" required>
+                    </div>
+                    <div class="input-group">
+                        <label>연락처 *</label>
+                        <input type="tel" id="user-phone" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>행사 개요 및 추가 요청사항</label>
+                    <textarea id="user-memo" placeholder="행사 내용, 필요 장비, 주차 등 문의사항을 자유롭게 적어주세요."></textarea>
+                </div>
+                <div class="input-group">
+                    <label>첨부파일 (행사 기획안 등)</label>
+                    <input type="file" id="user-file">
+                </div>
+
+                <div class="privacy-box">
+                    <strong>개인정보 수집 및 이용 안내</strong>
+                    <ul>
+                        <li>수집 항목: 성함, 연락처, 이메일, 회사명/단체명</li>
+                        <li>수집 목적: 대관 문의 상담 및 예약 서비스 제공</li>
+                        <li>보유 기간: 상담 완료 후 1년 (계약 시 관련 법령에 의거 보관)</li>
+                    </ul>
+                    <div class="consent-check">
+                        <input type="checkbox" id="privacy-agree" required>
+                        <label for="privacy-agree">개인정보 수집 및 이용에 동의합니다. <a href="privacy.html" target="_blank" style="text-decoration: underline; color: #888; font-weight: 400; font-size: 0.75rem;">[약관보기]</a></label>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">대관 문의 신청하기</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            const data = JSON.parse(localStorage.getItem('inquiryData'));
+            if (!data) {
+                alert('잘못된 접근입니다.');
+                location.href = 'rental.html';
+                return;
+            }
+
+            document.getElementById('selected-summary').innerHTML = `
+                <strong>선택한 공간:</strong> ${data.halls.join(', ')}<br>
+                <strong>행사 성격:</strong> ${data.category}<br>
+                <strong>희망 기간:</strong> ${data.period}
+            `;
+
+            document.getElementById('final-inquiry-form').onsubmit = (e) => {
+                e.preventDefault();
+                
+                if (!document.getElementById('privacy-agree').checked) {
+                    alert('개인정보 수집 및 이용에 동의해주세요.');
+                    return;
+                }
+
+                const list = JSON.parse(localStorage.getItem('inquiryList') || '[]');
+                const newInquiry = {
+                    ...data,
+                    name: document.getElementById('user-name').value,
+                    company: document.getElementById('user-company').value,
+                    email: document.getElementById('user-email').value,
+                    phone: document.getElementById('user-phone').value,
+                    memo: document.getElementById('user-memo').value,
+                    date: new Date().toLocaleDateString(),
+                    status: 'pending',
+                    attachedFiles: document.getElementById('user-file').files[0] ? [document.getElementById('user-file').files[0].name] : []
+                };
+                list.push(newInquiry);
+                localStorage.setItem('inquiryList', JSON.stringify(list));
+                location.href = 'complete.html';
+            };
+        });
+    </script>
+</body>
+</html>

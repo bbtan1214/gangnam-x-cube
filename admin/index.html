@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GANGNAM X CUBE | Admin Dashboard</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        body { background: #f4f7f6; display: flex; height: 100vh; overflow: hidden; }
+        
+        .admin-sidebar { width: 280px; background: #000; color: #fff; height: 100%; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 40px 30px; border-bottom: 1px solid #333; }
+        .sidebar-nav { flex: 1; padding: 30px 0; }
+        .nav-item { 
+            padding: 15px 30px; display: flex; align-items: center; gap: 15px; 
+            color: #888; text-decoration: none; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+        }
+        .nav-item:hover { color: #fff; background: #111; }
+        .nav-item.active { color: #fff; background: #222; border-left: 4px solid #fff; }
+        
+        .admin-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .admin-header { background: #fff; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .admin-content { flex: 1; padding: 40px; overflow-y: auto; }
+        
+        .tab-content { display: none; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+        
+        .data-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        .data-table th { background: #f8f8f8; padding: 15px; font-size: 0.75rem; color: #999; text-transform: uppercase; text-align: left; }
+        .data-table td { padding: 15px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+        
+        .status-chip { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .status-chip.pending { background: #fff4e5; color: #ff9800; }
+        .status-chip.confirmed { background: #e6f7ef; color: #00c853; }
+        
+        .cms-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+        .cms-card { background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #eee; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <h2 style="font-size: 1.1rem; letter-spacing: 0.05em;">GANGNAM X CUBE</h2>
+            <p style="font-size: 0.65rem; opacity: 0.5; margin-top: 5px;">MANAGEMENT CONSOLE</p>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-item active" data-tab="inquiry">문의 관리</div>
+            <div class="nav-item" data-tab="content">콘텐츠 관리 (CMS)</div>
+            <div class="nav-item" data-tab="status">예약 현황 (캘린더)</div>
+            <div class="nav-item" data-tab="notice">공지사항 관리</div>
+            <div class="nav-item" data-tab="stats">데이터 통계</div>
+            <div class="nav-item" data-tab="settings">시스템 설정</div>
+        </nav>
+        <div style="padding: 30px; border-top: 1px solid #333;">
+            <button id="btn-admin-logout" style="background:none; border:none; color:#888; cursor:pointer; font-size:0.8rem;">Sign Out</button>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div>
+                <h3 id="admin-header-title" style="margin:0; font-size:1.4rem;">대관 문의 관리</h3>
+                <p id="admin-header-breadcrumb" style="font-size:0.75rem; color:#aaa; margin-top:5px;">매니지먼트 / 대관 문의</p>
+            </div>
+            <div class="header-tools">
+                <button id="btn-export-data" class="save-btn" style="background:#444; color:#fff; padding:8px 15px; font-size:0.75rem; border:none; border-radius:4px; cursor:pointer;">데이터 백업 (JSON)</button>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <!-- Inquiry Tab -->
+            <div id="tab-inquiry" class="tab-content active">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>상태</th>
+                            <th>구분</th>
+                            <th>문의자 (업체)</th>
+                            <th>연락처 / 이메일</th>
+                            <th>공간</th>
+                            <th>희망 일정</th>
+                            <th>첨부</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inquiry-list-body">
+                        <!-- Loaded via main.js -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Content Tab (CMS) -->
+            <div id="tab-content" class="tab-content">
+                <div class="cms-grid">
+                    <div class="cms-card">
+                        <h4>Hall A - Grand Main</h4>
+                        <div class="input-group">
+                            <label>Title</label>
+                            <input type="text" id="cms-hall-a-title" class="cms-input">
+                        </div>
+                        <div class="input-group">
+                            <label>Description</label>
+                            <textarea id="cms-hall-a-desc" class="cms-textarea" style="width:100%; height:100px;"></textarea>
+                        </div>
+                    </div>
+                    <div class="cms-card">
+                        <h4>Hall B - Reception</h4>
+                        <div class="input-group">
+                            <label>Title</label>
+                            <input type="text" id="cms-hall-b-title" class="cms-input">
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-save-cms" class="save-btn" style="margin-top:40px; background:#000; color:#fff; padding:15px 40px; border:none; border-radius:4px; cursor:pointer; font-weight:700;">변경사항 저장하기</button>
+            </div>
+
+            <!-- Notice Tab -->
+            <div id="tab-notice" class="tab-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>작성일</th>
+                            <th>제목</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cms-notice-list-body">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Status Tab (Calendar) -->
+            <div id="tab-status" class="tab-content">
+                <div style="background:#fff; padding:30px; border-radius:12px; border:1px solid #eee;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                        <h4 id="cal-current-month">2026년 5월</h4>
+                        <div>
+                            <select id="cal-year-select"></select>
+                            <select id="cal-month-select"></select>
+                            <button id="btn-prev-month">이전</button>
+                            <button id="btn-next-month">다음</button>
+                        </div>
+                    </div>
+                    <div id="status-calendar-grid" style="display:grid; grid-template-columns: repeat(7, 1fr); gap:2px; background:#eee; border:1px solid #eee;">
+                        <!-- Calendar grid -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Inquiry Detail Modal -->
+    <div id="inquiry-detail-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+        <div style="background:#fff; width:90%; max-width:800px; max-height:90vh; overflow-y:auto; padding:40px; border-radius:12px;">
+            <div id="detail-modal-body"></div>
+            <div class="modal-footer" style="margin-top:40px; display:flex; justify-content:flex-end; gap:10px;">
+                <button onclick="closeInquiryDetail()" style="padding:10px 25px; border:1px solid #ddd; background:none; cursor:pointer;">닫기</button>
+                <button id="btn-delete-inq" style="padding:10px 25px; background:#ff4444; color:#fff; border:none; cursor:pointer;">삭제</button>
+                <button id="btn-confirm-inq" style="padding:10px 25px; background:#000; color:#fff; border:none; cursor:pointer;">예약 확정</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../main.js?v=40"></script>
+</body>
+</html>

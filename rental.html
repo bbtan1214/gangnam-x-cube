@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대관 신청 | GANGNAM X CUBE</title>
+    <meta name="description" content="GANGNAM X CUBE의 실시간 대관 현황을 확인하고 온라인으로 간편하게 신청하세요. Grand Hall, Reception Hall, Studio Hall 등 용도에 맞는 최적의 공간을 제안합니다.">
+    <meta property="og:title" content="대관 신청 | GANGNAM X CUBE">
+    <meta property="og:description" content="실시간 대관 현황 확인 및 온라인 신청">
+    <meta property="og:image" content="main_grandhall.jpg">
+    <link rel="stylesheet" href="style.css">
+    <!-- Airbnb Style Flatpickr Theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/index.js"
+      }
+    }
+    </script>
+    <style>
+        .rental-container { max-width: 1200px; margin: 120px auto 80px; padding: 0 20px; }
+        .section-title { font-family: 'Fraunces', serif; font-size: 2.5rem; text-align: center; margin-bottom: 50px; }
+        
+        /* 1. 신청 기능 (Top Form) */
+        .top-inquiry-section { background: #fff; border: 1px solid #000; padding: 50px; margin-bottom: 100px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr 1fr; gap: 20px; align-items: flex-end; }
+        .form-group { display: flex; flex-direction: column; gap: 10px; }
+        .form-group label { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; color: #999; text-transform: uppercase; }
+        .form-group select, .form-group input { padding: 15px; border: 1px solid #eee; background: #fafafa; font-weight: 600; outline: none; transition: border 0.3s; }
+        .form-group select:focus, .form-group input:focus { border-color: #000; }
+        .submit-btn-top { background: #000; color: #fff; padding: 18px; border: none; font-weight: 800; cursor: pointer; transition: opacity 0.3s; }
+        .submit-btn-top:hover { opacity: 0.8; }
+
+        /* 2. 자료실 */
+        .resource-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 100px; }
+        .resource-card { background: #fff; border: 1px solid #eee; padding: 30px; border-radius: 8px; transition: all 0.3s; cursor: pointer; text-align: center; }
+        .resource-card:hover { border-color: #000; transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+
+        /* 3. 공간 사진 */
+        .hall-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 100px; }
+        .hall-card { border: 1px solid #eee; border-radius: 8px; overflow: hidden; background: #fff; transition: transform 0.3s; }
+        .hall-img-box { width: 100%; height: 250px; overflow: hidden; }
+        .hall-img-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .hall-card:hover { transform: translateY(-5px); }
+        .hall-card:hover img { transform: scale(1.05); }
+        .hall-info { padding: 30px; text-align: center; }
+
+        /* 4. 캘린더 (Fixed Layout) */
+        .calendar-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 80px; }
+        .inline-calendar-wrapper { 
+            background: #fff; 
+            border: 1px solid #eee; 
+            border-radius: 12px; 
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 450px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+        .cal-label { font-size: 0.8rem; font-weight: 700; color: #000; margin-bottom: 15px; letter-spacing: 0.05em; }
+        .inline-calendar { width: 100%; }
+
+        @media (max-width: 1000px) {
+            .form-grid, .resource-grid, .hall-selection-grid, .calendar-section { grid-template-columns: 1fr !important; }
+        }
+        
+        /* Custom Flatpickr Overrides for Premium Look */
+        .flatpickr-calendar.inline {
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="logo-container" onclick="location.href='index.html'" style="cursor: pointer;">
+            <h1 class="logo-title">GANGNAM<br>X CUBE</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="index.html">공간 안내</a></li>
+                <li><a href="3d_view.html">3D 공간 뷰어</a></li>
+                <li class="active"><a href="rental.html">대관 신청</a></li>
+                <li><a href="contact.html">CONTACT</a></li>
+                <li><a href="notice.html">공지사항</a></li>
+            </ul>
+        </nav>
+        <div class="header-right">
+            <div class="mobile-menu-btn" id="mobile-menu-toggle">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="rental-container">
+        <div class="section-title">Application</div>
+        <div class="top-inquiry-section">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Hall Selection</label>
+                    <select id="rental-hall-top">
+                        <option value="Total">ALL SPACES</option>
+                        <option value="Grand Hall">Grand Hall (A)</option>
+                        <option value="Reception Hall">Reception Hall (B)</option>
+                        <option value="Studio Hall">Studio Hall (C)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Event Category</label>
+                    <select id="rental-category">
+                        <option value="Conference">컨퍼런스/세미나</option>
+                        <option value="Exhibition">전시/아트페어</option>
+                        <option value="Popup">브랜드 팝업</option>
+                        <option value="Shooting">촬영/스튜디오</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Rental Period</label>
+                    <input type="text" id="rental-period" placeholder="날짜를 선택하세요" readonly>
+                </div>
+                <button class="submit-btn-top" id="btn-submit-rental">APPLY NOW</button>
+            </div>
+        </div>
+
+        <div class="section-title" style="font-size: 2rem;">Downloads</div>
+        <div class="resource-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="resource-card" onclick="window.open(encodeURI('대관자료 모음/대관 안내문 (BMM-SRG-202605-01).pdf'))">
+                <div style="font-size: 2.5rem; margin-bottom: 15px;">📄</div>
+                <h4 style="margin-bottom: 10px; font-size: 0.95rem;">대관 안내문</h4>
+                <p style="font-size: 0.75rem; color: #888;">BMM-SRG-202605-01</p>
+            </div>
+            <div class="resource-card" onclick="window.open(encodeURI('대관자료 모음/대관공간 상세 도면자료 (BMM-DR-202605-01).pdf'))">
+                <div style="font-size: 2.5rem; margin-bottom: 15px;">📐</div>
+                <h4 style="margin-bottom: 10px; font-size: 0.95rem;">상세 도면자료</h4>
+                <p style="font-size: 0.75rem; color: #888;">BMM-DR-202605-01</p>
+            </div>
+            <div class="resource-card" onclick="window.open(encodeURI('대관자료 모음/대관시설 사용 안내 (BMM-UG-202605-01).pdf'))">
+                <div style="font-size: 2.5rem; margin-bottom: 15px;">🛠️</div>
+                <h4 style="margin-bottom: 10px; font-size: 0.95rem;">시설 사용 안내</h4>
+                <p style="font-size: 0.75rem; color: #888;">BMM-UG-202605-01</p>
+            </div>
+            <div class="resource-card" onclick="window.open(encodeURI('대관자료 모음/보유시설 및 장비 리스트 (BMM-EL-202605-01).pdf'))">
+                <div style="font-size: 2.5rem; margin-bottom: 15px;">📋</div>
+                <h4 style="margin-bottom: 10px; font-size: 0.95rem;">장비 리스트</h4>
+                <p style="font-size: 0.75rem; color: #888;">BMM-EL-202605-01</p>
+            </div>
+            <div class="resource-card" onclick="window.open(encodeURI('대관자료 모음/주차 이용 안내문 (BMM-PG-202605-01).pdf'))">
+                <div style="font-size: 2.5rem; margin-bottom: 15px;">🅿️</div>
+                <h4 style="margin-bottom: 10px; font-size: 0.95rem;">주차 이용 안내</h4>
+                <p style="font-size: 0.75rem; color: #888;">BMM-PG-202605-01</p>
+            </div>
+        </div>
+
+        <div class="section-title" style="font-size: 2rem;">Space Gallery</div>
+        <div class="hall-selection-grid">
+            <div class="hall-card">
+                <div class="hall-img-box"><img src="main_grandhall.jpg"></div>
+                <div class="hall-info">
+                    <h4 style="margin-bottom: 10px;">Grand Hall (A)</h4>
+                    <p style="font-size: 0.8rem; color: #888;">284㎡ | 250명 수용 | 층고 5.0m</p>
+                </div>
+            </div>
+            <div class="hall-card">
+                <div class="hall-img-box"><img src="main_reception.jpg"></div>
+                <div class="hall-info">
+                    <h4 style="margin-bottom: 10px;">Reception Hall (B)</h4>
+                    <p style="font-size: 0.8rem; color: #888;">205㎡ | 100명 수용 | 층고 3.5m</p>
+                </div>
+            </div>
+            <div class="hall-card">
+                <div class="hall-img-box"><img src="main_studio.jpg"></div>
+                <div class="hall-info">
+                    <h4 style="margin-bottom: 10px;">Studio Hall (C)</h4>
+                    <p style="font-size: 0.8rem; color: #888;">280㎡ | 150명 수용 | 층고 3.2m</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title" style="font-size: 2rem;">Availability Check</div>
+        <div class="calendar-section">
+            <div class="inline-calendar-wrapper">
+                <div class="cal-label">Grand Hall (A)</div>
+                <div class="inline-calendar" id="inline-cal-a"></div>
+            </div>
+            <div class="inline-calendar-wrapper">
+                <div class="cal-label">Reception Hall (B)</div>
+                <div class="inline-calendar" id="inline-cal-b"></div>
+            </div>
+            <div class="inline-calendar-wrapper">
+                <div class="cal-label">Studio Hall (C)</div>
+                <div class="inline-calendar" id="inline-cal-c"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var periodInput = document.getElementById('rental-period');
+            
+            var fpConfig = {
+                inline: true,
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                onChange: function(dates, dateStr) {
+                    if (dates.length === 2) {
+                        periodInput.value = dateStr;
+                    }
+                }
+            };
+
+            if (window.flatpickr) {
+                window.flatpickr('#inline-cal-a', fpConfig);
+                window.flatpickr('#inline-cal-b', fpConfig);
+                window.flatpickr('#inline-cal-c', fpConfig);
+
+                window.flatpickr('#rental-period', {
+                    mode: 'range',
+                    dateFormat: 'Y-m-d',
+                    onChange: function(dates, dateStr) {
+                        periodInput.value = dateStr;
+                    }
+                });
+            }
+
+            document.getElementById('btn-submit-rental').onclick = function() {
+                var hall = document.getElementById('rental-hall-top').value;
+                var category = document.getElementById('rental-category').value;
+                var period = periodInput.value;
+                
+                if (!period) return alert('날짜를 선택해 주세요.');
+                
+                localStorage.setItem('inquiryData', JSON.stringify({
+                    halls: [hall],
+                    period: period,
+                    category: category
+                }));
+                location.href = 'inquiry_form.html';
+            };
+        });
+    </script>
+</body>
+</html>
