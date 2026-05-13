@@ -1,8 +1,8 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-import gsap from 'gsap';
+import * as THREE from 'https://cdn.skypack.dev/three@0.160.0';
+import { OrbitControls } from 'https://cdn.skypack.dev/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'https://cdn.skypack.dev/three@0.160.0/examples/jsm/loaders/DRACOLoader.js';
+import gsap from 'https://cdn.skypack.dev/gsap';
 
 console.log("🛠️ BMM Script Loading... v1.39");
 window.addEventListener('error', (e) => {
@@ -75,6 +75,12 @@ const DEFAULT_CONTENT = {
         email: 'museum@bmm.kr',
         partnership: 'biz@bmm.kr',
         hours: 'Weekdays / 09:30 AM ~ 06:30 PM\nWeekends & Holidays / Closed'
+    },
+    siteInfo: {
+        heroTitle: 'GANGNAM X CUBE',
+        heroSub: 'HIGH-END EVENT VENUE',
+        introMain: '강남 중심가 336평 대형 대관, GANGNAM X CUBE는\n기업 행사와 산업 전시에 특화된 하이엔드 이벤트 베뉴입니다.',
+        introSub: '부띠크모나코의 미학적 건축물이 주는 상징성과 넓은 오픈 플랜 구조는 컨퍼런스, 브랜드 런칭, 아트 페어 등 대규모 이벤트 기획에 최적화된 환경을 제공합니다.\n독보적인 규모와 압도적 접근성을 갖춘 공간에서 귀사의 비즈니스 이벤트를 성공적으로 개최하십시오.'
     },
     heroImg: 'main_grandhall.jpg'
 };
@@ -325,6 +331,25 @@ function loadSiteContent() {
         }
     }
 
+    // Site Info (Home Page)
+    const si = content.siteInfo || DEFAULT_CONTENT.siteInfo;
+    const siEls = {
+        'hero-title': si.heroTitle,
+        'hero-subtitle': si.heroSub,
+        'intro-main': si.introMain,
+        'intro-sub': si.introSub
+    };
+    for (const id in siEls) {
+        const el = document.getElementById(id);
+        if (el) {
+            if (id === 'intro-main' || id === 'intro-sub') {
+                el.innerHTML = siEls[id].replace(/\n/g, '<br>');
+            } else {
+                el.innerText = siEls[id];
+            }
+        }
+    }
+
     // Gallery
     const gallery = document.getElementById('space-gallery');
     if (gallery && content.gallery) {
@@ -402,15 +427,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initialize Admin Dashboard if on the actual management page (not login)
-    if (document.getElementById('admin-header-title') && !location.pathname.includes('login.html')) {
+    const isLoginPage = location.pathname.includes('login.html');
+    const isAdminPage = !!document.getElementById('admin-header-title');
+    
+    if (isAdminPage && !isLoginPage) {
+        console.log("🛠️ Admin Page Detected. Initializing Dashboard...");
         initAdminDashboard();
     }
 
-    // CRITICAL: Remove the Fade Overlay
-    setTimeout(() => {
-        document.body.classList.add('loaded');
-        renderContactInfo();
-    }, 300);
+    // Force fade-in loaded state
+    document.body.classList.add('loaded');
+    renderContactInfo();
+    renderNotices();
 });
 
 /**
@@ -978,6 +1006,13 @@ function initCMS() {
         document.getElementById('cms-hero-img').value = content.heroImg || '';
     }
 
+    // 3. Fill Site Info Data
+    const si = content.siteInfo || DEFAULT_CONTENT.siteInfo;
+    if (document.getElementById('cms-site-hero-title')) document.getElementById('cms-site-hero-title').value = si.heroTitle;
+    if (document.getElementById('cms-site-hero-sub')) document.getElementById('cms-site-hero-sub').value = si.heroSub;
+    if (document.getElementById('cms-site-intro-main')) document.getElementById('cms-site-intro-main').value = si.introMain;
+    if (document.getElementById('cms-site-intro-sub')) document.getElementById('cms-site-intro-sub').value = si.introSub;
+
     // Resource Management Logic
     const resList = document.getElementById('cms-resource-list');
     if (resList) {
@@ -1037,6 +1072,13 @@ function initCMS() {
                 email: document.getElementById('cms-contact-email').value,
                 partnership: document.getElementById('cms-contact-partnership').value,
                 hours: document.getElementById('cms-contact-hours').value
+            };
+
+            newContent.siteInfo = {
+                heroTitle: document.getElementById('cms-site-hero-title').value,
+                heroSub: document.getElementById('cms-site-hero-sub').value,
+                introMain: document.getElementById('cms-site-intro-main').value,
+                introSub: document.getElementById('cms-site-intro-sub').value
             };
             
             const resItems = document.querySelectorAll('.cms-resource-item');

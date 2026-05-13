@@ -69,25 +69,75 @@
     <section id="main-hero-section" class="main-hero" style="position: relative; width: 100%; height: 85vh; background: url('main_grandhall.jpg') no-repeat center center/cover; margin-top: -80px; display: flex; align-items: center; justify-content: center;">
         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3);"></div>
         <div style="position: relative; z-index: 5; text-align: center; color: #fff;">
-            <h2 style="font-family: 'Fraunces', serif; font-size: 6vw; letter-spacing: 0.1em; text-shadow: 0 10px 30px rgba(0,0,0,0.5);">GANGNAM X CUBE</h2>
-            <p style="font-size: 0.8rem; letter-spacing: 0.5em; opacity: 0.8; margin-top: 20px;">HIGH-END EVENT VENUE</p>
+            <h2 id="hero-title" style="font-family: 'Fraunces', serif; font-size: 6vw; letter-spacing: 0.1em; text-shadow: 0 10px 30px rgba(0,0,0,0.5);">GANGNAM X CUBE</h2>
+            <p id="hero-subtitle" style="font-size: 0.8rem; letter-spacing: 0.5em; opacity: 0.8; margin-top: 20px;">HIGH-END EVENT VENUE</p>
         </div>
     </section>
 
     <!-- 2. Introduction -->
     <section class="intro-section" style="padding: 120px 20px; text-align: center; background: #fff;">
         <div style="max-width: 900px; margin: 0 auto;">
-            <h3 style="font-family: 'Fraunces', serif; font-size: 1.4rem; letter-spacing: 0.15em; margin-bottom: 50px;">
-                B1 MUSEUM, BOUTIQUE MONACO
-                <span style="display: block; width: 40px; height: 1px; background: #000; margin: 30px auto 0;"></span>
-            </h3>
-            <p style="font-size: 1.4rem; font-weight: 700; line-height: 1.6; margin-bottom: 40px; word-break: keep-all;">
+            <p id="intro-main" style="font-size: 1.4rem; font-weight: 700; line-height: 1.6; margin-bottom: 40px; word-break: keep-all;">
                 강남 중심가 336평 대형 대관, GANGNAM X CUBE는<br>기업 행사와 산업 전시에 특화된 하이엔드 이벤트 베뉴입니다.
             </p>
-            <p style="color: #666; line-height: 2; font-size: 1.05rem; word-break: keep-all;">
+            <p id="intro-sub" style="color: #666; line-height: 2; font-size: 1.05rem; word-break: keep-all;">
                 부띠크모나코의 미학적 건축물이 주는 상징성과 넓은 오픈 플랜 구조는 컨퍼런스, 브랜드 런칭, 아트 페어 등 대규모 이벤트 기획에 최적화된 환경을 제공합니다.<br>
                 독보적인 규모와 압도적 접근성을 갖춘 공간에서 귀사의 비즈니스 이벤트를 성공적으로 개최하십시오.
             </p>
+        </div>
+    </section>
+
+    <!-- 2.5 Space Overview Cards (Restored) -->
+    <section class="spaces-overview" style="padding: 100px 20px; background: #fff;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h3 style="font-family: 'Fraunces', serif; font-size: 2.2rem; text-align: center; margin-bottom: 80px;">The Spaces</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 40px;">
+                <!-- Hall A -->
+                <div class="space-card" style="border: 1px solid #eee; background: #fff; transition: transform 0.3s;">
+                    <div style="width: 100%; height: 300px; overflow: hidden;">
+                        <img id="hall-a-preview-img" src="main_grandhall.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="padding: 40px; text-align: center;">
+                        <h4 id="hall-a-title" style="font-family: 'Fraunces', serif; font-size: 1.5rem; margin-bottom: 20px;">Grand Hall (A)</h4>
+                        <p id="hall-a-desc" style="color: #666; font-size: 0.95rem; line-height: 1.8; margin-bottom: 30px; min-height: 80px;">강남 최대 규모의 오픈 플랜 베뉴로 대형 컨퍼런스 및 브랜드 런칭쇼에 최적화된 공간입니다.</p>
+                        <ul id="hall-a-spec-list" style="list-style: none; padding: 0; margin-bottom: 30px; font-size: 0.85rem; color: #888; border-top: 1px solid #f5f5f5; padding-top: 20px;">
+                            <li>면적: 284㎡ / 수용: 250명 / 층고: 5.0m</li>
+                        </ul>
+                        <button onclick="location.href='3d_view.html?hall=A'" style="padding: 12px 30px; background: #000; color: #fff; border: none; cursor: pointer; font-size: 0.8rem; letter-spacing: 0.1em;">EXPLORE 3D</button>
+                    </div>
+                </div>
+
+                <!-- Hall B -->
+                <div class="space-card" style="border: 1px solid #eee; background: #fff; transition: transform 0.3s;">
+                    <div style="width: 100%; height: 300px; overflow: hidden;">
+                        <img id="hall-b-preview-img" src="main_reception.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="padding: 40px; text-align: center;">
+                        <h4 id="hall-b-title" style="font-family: 'Fraunces', serif; font-size: 1.5rem; margin-bottom: 20px;">Reception Hall (B)</h4>
+                        <p id="hall-b-desc" style="color: #666; font-size: 0.95rem; line-height: 1.8; margin-bottom: 30px; min-height: 80px;">감각적인 라운지 분위기와 개방감을 갖춘 공간으로 VIP 리셉션 및 프라이빗 파티에 적합합니다.</p>
+                        <ul id="hall-b-spec-list" style="list-style: none; padding: 0; margin-bottom: 30px; font-size: 0.85rem; color: #888; border-top: 1px solid #f5f5f5; padding-top: 20px;">
+                            <li>면적: 205㎡ / 수용: 100명 / 층고: 3.5m</li>
+                        </ul>
+                        <button onclick="location.href='3d_view.html?hall=B'" style="padding: 12px 30px; background: #000; color: #fff; border: none; cursor: pointer; font-size: 0.8rem; letter-spacing: 0.1em;">EXPLORE 3D</button>
+                    </div>
+                </div>
+
+                <!-- Hall C -->
+                <div class="space-card" style="border: 1px solid #eee; background: #fff; transition: transform 0.3s;">
+                    <div style="width: 100%; height: 300px; overflow: hidden;">
+                        <img id="hall-c-preview-img" src="main_studio.jpg" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="padding: 40px; text-align: center;">
+                        <h4 id="hall-c-title" style="font-family: 'Fraunces', serif; font-size: 1.5rem; margin-bottom: 20px;">Studio Hall (C)</h4>
+                        <p id="hall-c-desc" style="color: #666; font-size: 0.95rem; line-height: 1.8; margin-bottom: 30px; min-height: 80px;">유연한 공간 활용이 가능한 스튜디오 타입으로 창의적인 전시와 소규모 촬영에 최적화되어 있습니다.</p>
+                        <ul id="hall-c-spec-list" style="list-style: none; padding: 0; margin-bottom: 30px; font-size: 0.85rem; color: #888; border-top: 1px solid #f5f5f5; padding-top: 20px;">
+                            <li>면적: 280㎡ / 수용: 150명 / 층고: 3.2m</li>
+                        </ul>
+                        <button onclick="location.href='3d_view.html?hall=C'" style="padding: 12px 30px; background: #000; color: #fff; border: none; cursor: pointer; font-size: 0.8rem; letter-spacing: 0.1em;">EXPLORE 3D</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -167,7 +217,7 @@
         <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between;">
             <div>
                 <h1 style="font-size: 1.5rem; margin-bottom: 20px;">GANGNAM<br>X CUBE</h1>
-                <p style="font-size: 0.8rem; color: #999;">© 2026 GANGNAM X CUBE. All rights reserved.</p>
+                <p style="font-size: 0.8rem; color: #999;">© 2026 Boutique Monaco Museum. All rights reserved.</p>
                 <a href="privacy.html" style="font-size: 0.75rem; color: #bbb; text-decoration: underline; margin-top: 10px; display: inline-block;">개인정보처리방침</a>
             </div>
             <div style="text-align: right; font-size: 0.85rem; line-height: 2;">
