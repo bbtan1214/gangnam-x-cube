@@ -401,8 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Initialize Admin Dashboard if on admin page
-    if (document.getElementById('admin-header-title') || location.pathname.includes('/admin/')) {
+    // Initialize Admin Dashboard if on the actual management page (not login)
+    if (document.getElementById('admin-header-title') && !location.pathname.includes('login.html')) {
         initAdminDashboard();
     }
 
@@ -1593,4 +1593,99 @@ window.openImageModal = function(src) {
     img.src = src;
     modal.style.display = 'flex';
 };
+/**
+ * Admin: Notice Management
+ */
+function initAdminNotices() {
+    const listBody = document.getElementById('cms-notice-list-body');
+    if (!listBody) return;
+    const content = JSON.parse(localStorage.getItem('siteContent_v3')) || DEFAULT_CONTENT;
+    listBody.innerHTML = (content.notices || []).map((n, idx) => `
+        <tr>
+            <td>${n.date}</td>
+            <td><strong>${n.title}</strong></td>
+            <td><button class="delete-btn" onclick="window.deleteNotice(${idx})">삭제</button></td>
+        </tr>
+    `).join('');
+}
 
+window.deleteNotice = (idx) => {
+    if (confirm('정말 삭제하시겠습니까?')) {
+        const content = JSON.parse(localStorage.getItem('siteContent_v3')) || DEFAULT_CONTENT;
+        content.notices.splice(idx, 1);
+        localStorage.setItem('siteContent_v3', JSON.stringify(content));
+        initAdminNotices();
+    }
+};
+
+/**
+ * Admin: Space Status (Calendar)
+ */
+let adminCalDate = new Date(); 
+function initSpaceStatus() {
+    const grid = document.getElementById('status-calendar-grid');
+    const yearSelect = document.getElementById('cal-year-select');
+    const monthSelect = document.getElementById('cal-month-select');
+    if (!grid || !yearSelect || !monthSelect) return;
+    
+    const year = adminCalDate.getFullYear();
+    const month = adminCalDate.getMonth();
+    
+    if (yearSelect.options.length === 0) {
+        for (let y = 2024; y <= 2030; y++) yearSelect.add(new Option(`${y}년`, y));
+        for (let m = 0; m < 12; m++) monthSelect.add(new Option(`${m + 1}월`, m));
+        yearSelect.onchange = () => { adminCalDate.setFullYear(yearSelect.value); initSpaceStatus(); };
+        monthSelect.onchange = () => { adminCalDate.setMonth(monthSelect.value); initSpaceStatus(); };
+    }
+
+    yearSelect.value = year;
+    monthSelect.value = month;
+    
+    const list = JSON.parse(localStorage.getItem('inquiryList') || '[]');
+    const confirmed = list.filter(i => i.status === 'confirmed');
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+    
+    let html = '';
+    for (let i = 0; i < firstDay; i++) html += `<div class="calendar-day empty"></div>`;
+    for (let day = 1; day <= lastDate; day++) {
+        const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        const matches = confirmed.filter(inq => {
+            const p = inq.period || (inq.startDate + ' ~ ' + inq.endDate);
+            if (!p) return false;
+            const [start, end] = p.split(' ~ ');
+            return dateStr >= start && dateStr <= end;
+        });
+        let spots = '';
+        matches.forEach(m => {
+            (m.halls || []).forEach(h => {
+                const type = h.includes('A') ? 'a' : (h.includes('B') ? 'b' : 'c');
+                spots += `<i class="dot ${type}"></i>`;
+            });
+        });
+        html += `<div class="calendar-day ${matches.length ? 'booked' : ''}"><span class="day-num">${day}</span><div class="booking-dots">${spots}</div></div>`;
+    }
+    grid.innerHTML = html;
+}
+
+/**
+ * Admin: Stats & Settings
+ */
+function initAdminStats() {
+    // Placeholder for stats logic if needed
+    console.log("Stats module loaded");
+}
+
+function initAdminSettingsAccounts() {
+    const listBody = document.getElementById('admin-account-list');
+    if (!listBody) return;
+    const accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+    listBody.innerHTML = accounts.map((a, idx) => `
+        <tr>
+            <td><strong>${a.id}</strong></td>
+            <td>${a.role || 'Staff'}</td>
+            <td>${a.lastLogin || '-'}</td>
+            <td>${a.id !== 'admin' ? `<button onclick="window.deleteAdminAccount(${idx})">삭제</button>` : '고정'}</td>
+        </tr>
+    `).join('');
+}
