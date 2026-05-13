@@ -946,7 +946,7 @@ function initAdminSettingsAccounts() {
 function initCMS() {
     const content = JSON.parse(localStorage.getItem('siteContent_v3')) || DEFAULT_CONTENT;
     
-    // Fill Inquiry Data to Forms
+    // 1. Fill Hall Data
     for (const id in content.halls) {
         const h = content.halls[id];
         const prefix = `cms-hall-${id.toLowerCase()}`;
@@ -961,6 +961,15 @@ function initCMS() {
         if (document.getElementById(`${prefix}-height`)) document.getElementById(`${prefix}-height`).value = h.height;
     }
     
+    // 2. Fill Contact Data
+    const c = content.contact || DEFAULT_CONTENT.contact;
+    if (document.getElementById('cms-contact-address')) document.getElementById('cms-contact-address').value = c.address;
+    if (document.getElementById('cms-contact-address-en')) document.getElementById('cms-contact-address-en').value = c.addressEn;
+    if (document.getElementById('cms-contact-phone')) document.getElementById('cms-contact-phone').value = c.phone;
+    if (document.getElementById('cms-contact-email')) document.getElementById('cms-contact-email').value = c.email;
+    if (document.getElementById('cms-contact-partnership')) document.getElementById('cms-contact-partnership').value = c.partnership;
+    if (document.getElementById('cms-contact-hours')) document.getElementById('cms-contact-hours').value = c.hours;
+
     if (document.getElementById('cms-gallery-urls')) {
         document.getElementById('cms-gallery-urls').value = (content.gallery || []).join('\n');
     }
@@ -1020,6 +1029,15 @@ function initCMS() {
             });
             newContent.gallery = document.getElementById('cms-gallery-urls').value.split('\n').filter(l => l.trim());
             newContent.heroImg = document.getElementById('cms-hero-img').value;
+
+            newContent.contact = {
+                address: document.getElementById('cms-contact-address').value,
+                addressEn: document.getElementById('cms-contact-address-en').value,
+                phone: document.getElementById('cms-contact-phone').value,
+                email: document.getElementById('cms-contact-email').value,
+                partnership: document.getElementById('cms-contact-partnership').value,
+                hours: document.getElementById('cms-contact-hours').value
+            };
             
             const resItems = document.querySelectorAll('.cms-resource-item');
             newContent.resources = Array.from(resItems).map(item => ({
@@ -1546,7 +1564,13 @@ function renderContactInfo() {
     };
     for (const id in els) {
         const el = document.getElementById(id);
-        if (el) el.innerText = els[id];
+        if (el) {
+            if (id === 'contact-hours') {
+                el.innerHTML = els[id].replace(/\n/g, '<br>');
+            } else {
+                el.innerText = els[id];
+            }
+        }
     }
 }
 
