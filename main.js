@@ -400,6 +400,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    // Initialize Admin Dashboard if on admin page
+    if (document.getElementById('admin-header-title') || location.pathname.includes('/admin/')) {
+        initAdminDashboard();
+    }
+
     // CRITICAL: Remove the Fade Overlay
     setTimeout(() => {
         document.body.classList.add('loaded');

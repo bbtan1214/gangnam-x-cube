@@ -164,5 +164,39 @@
     </div>
 
     <script type="module" src="../main.js?v=40"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navItems = document.querySelectorAll('.nav-item');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const headerTitle = document.getElementById('admin-header-title');
+            const headerBreadcrumb = document.getElementById('admin-header-breadcrumb');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const tabId = item.getAttribute('data-tab');
+                    
+                    // Update Sidebar
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+
+                    // Update Tab Content
+                    tabContents.forEach(tab => tab.classList.remove('active'));
+                    document.getElementById('tab-' + tabId).classList.add('active');
+
+                    // Update Header Text
+                    headerTitle.innerText = item.innerText;
+                    headerBreadcrumb.innerText = '매니지먼트 / ' + item.innerText;
+                });
+            });
+
+            // Logout handling
+            document.getElementById('btn-admin-logout').addEventListener('click', () => {
+                if(confirm('로그아웃 하시겠습니까?')) {
+                    sessionStorage.removeItem('adminLoggedIn');
+                    location.href = 'login.html';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
