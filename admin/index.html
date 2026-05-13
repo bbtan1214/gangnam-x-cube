@@ -280,6 +280,61 @@
         </div>
     </div>
 
-    <script type="module" src="../main.js?v=42"></script>
+    <script type="module" src="../main.js?v=47"></script>
+    <script>
+        // Direct Menu Handling (Independent of main.js module status)
+        (function() {
+            function setupMenu() {
+                const navItems = document.querySelectorAll('.nav-item');
+                const tabContents = document.querySelectorAll('.tab-content');
+                
+                if (navItems.length === 0) return;
+
+                navItems.forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const target = item.getAttribute('data-tab');
+                        console.log("Menu clicked:", target);
+                        
+                        // 1. UI Update
+                        navItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                        
+                        tabContents.forEach(content => {
+                            content.style.display = content.id === 'tab-' + target ? 'block' : 'none';
+                            if (content.id === 'tab-' + target) content.classList.add('active');
+                            else content.classList.remove('active');
+                        });
+                        
+                        // 2. Title Update
+                        const titles = {
+                            inquiry: '통합 문의 관리',
+                            content: '웹 콘텐츠 관리 (CMS)',
+                            notice: '공지사항 관리',
+                            status: '공간 현황 및 일정',
+                            stats: '데이터 통계 분석',
+                            settings: '시스템 설정'
+                        };
+                        const headerTitle = document.getElementById('admin-header-title');
+                        if (headerTitle && titles[target]) headerTitle.innerText = titles[target];
+
+                        // 3. Trigger Data Load (if main.js is loaded)
+                        if (target === 'inquiry' && window.renderInquiryList) window.renderInquiryList();
+                        if (target === 'content' && window.initCMS) window.initCMS();
+                        if (target === 'notice' && window.initAdminNotices) window.initAdminNotices();
+                        if (target === 'status' && window.initSpaceStatus) window.initSpaceStatus();
+                    });
+                });
+                console.log("✅ Admin Menu System Initialized Directly");
+            }
+
+            // Run immediately and also on DOMContentLoaded
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setupMenu);
+            } else {
+                setupMenu();
+            }
+        })();
+    </script>
 </body>
 </html>

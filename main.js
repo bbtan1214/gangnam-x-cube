@@ -621,7 +621,7 @@ function initAdminDashboard() {
     }
 }
 
-function renderInquiryList() {
+window.renderInquiryList = function() {
     const body = document.getElementById('inquiry-list-body');
     if (!body) return;
     const list = JSON.parse(localStorage.getItem('inquiryList') || '[]');
@@ -793,7 +793,7 @@ function initEstimateManager() {
     }
 }
 
-function initAdminStats() {
+window.initAdminStats = function() {
     const list = JSON.parse(localStorage.getItem('inquiryList') || '[]');
     const startInput = document.getElementById('stats-date-start');
     const endInput = document.getElementById('stats-date-end');
@@ -925,7 +925,7 @@ function initAdminLogin() {
     };
 }
 
-function initAdminSettingsAccounts() {
+window.initAdminSettingsAccounts = function() {
     const listBody = document.getElementById('admin-account-list');
     const addForm = document.getElementById('admin-add-form');
     const showAddBtn = document.getElementById('btn-show-add-admin');
@@ -985,7 +985,7 @@ function initAdminSettingsAccounts() {
 /**
  * CMS Logic: Content Management
  */
-function initCMS() {
+window.initCMS = function() {
     const content = JSON.parse(localStorage.getItem('siteContent_v3')) || DEFAULT_CONTENT;
     
     // 1. Fill Hall Data
@@ -1270,7 +1270,7 @@ window.simulateHallUpload = (hallId, input) => {
 /**
  * Notice & Status Logic
  */
-function initAdminNotices() {
+window.initAdminNotices = function() {
     const listBody = document.getElementById('cms-notice-list-body');
     if (!listBody) return;
     const content = JSON.parse(localStorage.getItem('siteContent_v3')) || DEFAULT_CONTENT;
@@ -1294,7 +1294,7 @@ window.deleteNotice = (idx) => {
 
 let adminCalDate = new Date(); 
 
-function initSpaceStatus() {
+window.initSpaceStatus = function() {
     const grid = document.getElementById('status-calendar-grid');
     const yearSelect = document.getElementById('cal-year-select');
     const monthSelect = document.getElementById('cal-month-select');
