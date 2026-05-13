@@ -288,11 +288,12 @@ window.resolveImageUrl = (url) => {
 function loadSiteContent() {
     const saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
     const content = { ...DEFAULT_CONTENT, ...saved };
-    // Ensure nested objects like halls and notices are also merged or defaulted
+    
+    // Deep merge halls and siteInfo to ensure no fields are lost
+    content.halls = saved && saved.halls ? { ...DEFAULT_CONTENT.halls, ...saved.halls } : DEFAULT_CONTENT.halls;
+    content.siteInfo = saved && saved.siteInfo ? { ...DEFAULT_CONTENT.siteInfo, ...saved.siteInfo } : DEFAULT_CONTENT.siteInfo;
+    content.contact = saved && saved.contact ? { ...DEFAULT_CONTENT.contact, ...saved.contact } : DEFAULT_CONTENT.contact;
     if (!content.notices || content.notices.length === 0) content.notices = DEFAULT_CONTENT.notices;
-    // Force halls to use DEFAULT_CONTENT to prevent admin cached data from overwriting code updates
-    content.halls = DEFAULT_CONTENT.halls;
-    if (!content.contact) content.contact = DEFAULT_CONTENT.contact;
     
     // Hall Specs
     if (content.halls) {
@@ -324,6 +325,7 @@ function loadSiteContent() {
             if (rcTitle) rcTitle.innerText = h.title;
             const rcArea = document.getElementById(`hall-${lowId}-card-area`);
             if (rcArea) rcArea.innerText = h.area;
+            
             const rcCap = document.getElementById(`hall-${lowId}-card-cap`);
             if (rcCap) rcCap.innerText = h.cap;
             const rcHeight = document.getElementById(`hall-${lowId}-card-height`);
@@ -350,16 +352,28 @@ function loadSiteContent() {
         }
     }
 
-    // Gallery
-    const gallery = document.getElementById('space-gallery');
-    if (gallery && content.gallery) {
-        gallery.innerHTML = content.gallery.map(img => `
-            <div class="gallery-item-pill" data-src="${window.resolveImageUrl(img)}">
-                <img src="${window.resolveImageUrl(img)}" alt="Gallery" onerror="this.src='https://placehold.co/600x400?text=No+Image'">
-                <div class="item-hover-overlay"><span>VIEW</span></div>
-            </div>
-        `).join('');
-    }
+    // Gallery & Notices (Consolidated)
+    try {
+        const gallery = document.getElementById('space-gallery');
+        if (gallery && content.gallery) {
+            gallery.innerHTML = content.gallery.map(img => `
+                <div class="gallery-item-pill" data-src="${window.resolveImageUrl(img)}">
+                    <img src="${window.resolveImageUrl(img)}" alt="Gallery" onerror="this.src='https://placehold.co/600x400?text=No+Image'">
+                    <div class="item-hover-overlay"><span>VIEW</span></div>
+                </div>
+            `).join('');
+        }
+        
+        const noticeList = document.getElementById('main-notice-list');
+        if (noticeList && content.notices) {
+            noticeList.innerHTML = content.notices.map(n => `
+                <div class="notice-item ${n.urgent ? 'urgent' : ''}">
+                    <span class="notice-date">${n.date}</span>
+                    <h4 class="notice-title">${n.title}</h4>
+                </div>
+            `).join('');
+        }
+    } catch (e) { console.error("Final render block error:", e); }
 }
 
 // App Initialization
