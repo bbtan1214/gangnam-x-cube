@@ -326,9 +326,23 @@
                     });
                 });
                 console.log("✅ Admin Menu System Initialized Directly");
+
+                // 4. Initial Data Load with Retry (Wait for main.js)
+                function tryInitialLoad() {
+                    const activeTab = document.querySelector('.nav-item.active');
+                    const target = activeTab ? activeTab.getAttribute('data-tab') : 'inquiry';
+                    
+                    if (window.renderInquiryList) {
+                        if (target === 'inquiry') window.renderInquiryList();
+                        if (target === 'content') window.initCMS();
+                        console.log("📊 Admin Data Auto-Loaded: " + target);
+                    } else {
+                        setTimeout(tryInitialLoad, 500);
+                    }
+                }
+                tryInitialLoad();
             }
 
-            // Run immediately and also on DOMContentLoaded
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', setupMenu);
             } else {

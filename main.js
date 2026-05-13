@@ -37,7 +37,8 @@ const CONFIG = {
     }
 };
 
-const DEFAULT_CONTENT = {
+// Configuration
+window.DEFAULT_CONTENT = {
     halls: {
         A: {
             title: 'Grand Hall (A)',
@@ -986,7 +987,12 @@ window.initAdminSettingsAccounts = function() {
  * CMS Logic: Content Management
  */
 window.initCMS = function() {
-    const content = JSON.parse(localStorage.getItem('siteContent_v3')) || DEFAULT_CONTENT;
+    const saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
+    const content = { ...window.DEFAULT_CONTENT, ...saved };
+    
+    // Deep merge for nested fields
+    content.halls = saved.halls ? { ...window.DEFAULT_CONTENT.halls, ...saved.halls } : window.DEFAULT_CONTENT.halls;
+    content.siteInfo = saved.siteInfo ? { ...window.DEFAULT_CONTENT.siteInfo, ...saved.siteInfo } : window.DEFAULT_CONTENT.siteInfo;
     
     // 1. Fill Hall Data
     for (const id in content.halls) {
