@@ -94,26 +94,98 @@
             <!-- Content Tab (CMS) -->
             <div id="tab-content" class="tab-content">
                 <div class="cms-grid">
+                    <!-- Hall A -->
                     <div class="cms-card">
-                        <h4>Hall A - Grand Main</h4>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h4 style="margin:0;">Grand Hall (A)</h4>
+                            <input type="text" id="cms-hall-a-img" placeholder="메인 이미지 경로" class="cms-input" style="width:150px; font-size:0.7rem;">
+                        </div>
                         <div class="input-group">
-                            <label>Title</label>
+                            <label>제목</label>
                             <input type="text" id="cms-hall-a-title" class="cms-input">
                         </div>
                         <div class="input-group">
-                            <label>Description</label>
-                            <textarea id="cms-hall-a-desc" class="cms-textarea" style="width:100%; height:100px;"></textarea>
+                            <label>설명</label>
+                            <textarea id="cms-hall-a-desc" class="cms-textarea" style="width:100%; height:80px;"></textarea>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                            <div class="input-group"><label>면적</label><input type="text" id="cms-hall-a-area" class="cms-input"></div>
+                            <div class="input-group"><label>수용인원</label><input type="text" id="cms-hall-a-cap" class="cms-input"></div>
+                            <div class="input-group"><label>층고</label><input type="text" id="cms-hall-a-height" class="cms-input"></div>
                         </div>
                     </div>
+
+                    <!-- Hall B -->
                     <div class="cms-card">
-                        <h4>Hall B - Reception</h4>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h4 style="margin:0;">Reception Hall (B)</h4>
+                            <input type="text" id="cms-hall-b-img" placeholder="메인 이미지 경로" class="cms-input" style="width:150px; font-size:0.7rem;">
+                        </div>
                         <div class="input-group">
-                            <label>Title</label>
+                            <label>제목</label>
                             <input type="text" id="cms-hall-b-title" class="cms-input">
+                        </div>
+                        <div class="input-group">
+                            <label>설명</label>
+                            <textarea id="cms-hall-b-desc" class="cms-textarea" style="width:100%; height:80px;"></textarea>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                            <div class="input-group"><label>면적</label><input type="text" id="cms-hall-b-area" class="cms-input"></div>
+                            <div class="input-group"><label>수용인원</label><input type="text" id="cms-hall-b-cap" class="cms-input"></div>
+                            <div class="input-group"><label>층고</label><input type="text" id="cms-hall-b-height" class="cms-input"></div>
+                        </div>
+                    </div>
+
+                    <!-- Hall C -->
+                    <div class="cms-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h4 style="margin:0;">Studio Hall (C)</h4>
+                            <input type="text" id="cms-hall-c-img" placeholder="메인 이미지 경로" class="cms-input" style="width:150px; font-size:0.7rem;">
+                        </div>
+                        <div class="input-group">
+                            <label>제목</label>
+                            <input type="text" id="cms-hall-c-title" class="cms-input">
+                        </div>
+                        <div class="input-group">
+                            <label>설명</label>
+                            <textarea id="cms-hall-c-desc" class="cms-textarea" style="width:100%; height:80px;"></textarea>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                            <div class="input-group"><label>면적</label><input type="text" id="cms-hall-c-area" class="cms-input"></div>
+                            <div class="input-group"><label>수용인원</label><input type="text" id="cms-hall-c-cap" class="cms-input"></div>
+                            <div class="input-group"><label>층고</label><input type="text" id="cms-hall-c-height" class="cms-input"></div>
+                        </div>
+                    </div>
+
+                    <!-- Resource Management -->
+                    <div class="cms-card">
+                        <h4>대관 자료실 관리 (PDF/SKP)</h4>
+                        <div id="cms-resource-list" style="margin-bottom:20px;">
+                            <!-- Dynamically loaded -->
+                        </div>
+                        <button id="btn-add-resource" class="save-btn" style="background:#444; width:100%; padding:10px;">새 자료 항목 추가</button>
+                    </div>
+                </div>
+
+                <div style="margin-top:40px; display:grid; grid-template-columns: 1fr 2fr; gap:30px;">
+                    <div class="cms-card">
+                        <h4>글로벌 갤러리 이미지</h4>
+                        <label style="font-size:0.7rem; color:#888;">이미지 URL을 한 줄에 하나씩 입력하세요.</label>
+                        <textarea id="cms-gallery-urls" class="cms-textarea" style="width:100%; height:200px; margin-top:10px;"></textarea>
+                    </div>
+                    <div class="cms-card">
+                        <h4>이미지 업로드 존</h4>
+                        <div id="cms-upload-zone" style="border: 2px dashed #ccc; padding:60px; text-align:center; border-radius:8px; cursor:pointer;">
+                            <p style="margin:0; color:#999;">여기에 이미지를 드래그 앤 드롭하거나 클릭하여 업로드</p>
+                            <input type="file" id="cms-file-input" style="display:none" multiple accept="image/*">
+                        </div>
+                        <div id="msg-box" style="display:none; margin-top:20px; padding:15px; background:#e6f7ef; color:#00c853; font-size:0.85rem; border-radius:4px;">
+                            <div>성공적으로 업로드되었습니다.</div>
                         </div>
                     </div>
                 </div>
-                <button id="btn-save-cms" class="save-btn" style="margin-top:40px; background:#000; color:#fff; padding:15px 40px; border:none; border-radius:4px; cursor:pointer; font-weight:700;">변경사항 저장하기</button>
+
+                <button id="btn-save-cms" class="save-btn" style="margin-top:40px; background:#000; color:#fff; padding:15px 60px; border:none; border-radius:4px; cursor:pointer; font-weight:700; font-size:1.1rem;">변경사항 최종 저장하기</button>
             </div>
 
             <!-- Notice Tab -->
