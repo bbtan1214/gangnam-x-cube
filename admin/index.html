@@ -280,67 +280,79 @@
         </div>
     </div>
 
-    <script type="module" src="../main.js?v=47"></script>
+    <script type="module" src="../main.js?v=50"></script>
     <script>
-        // Direct Menu Handling (Independent of main.js module status)
+        // --- EMBEDDED DEFAULT DATA (Ensures CMS is never blank) ---
+        const BMM_DEFAULT_DATA = {
+            siteInfo: {
+                heroTitle: 'GANGNAM X CUBE',
+                heroSub: 'High-End Event & Exhibition Venue',
+                introMain: '강남 중심가 336평 대형 대관, GANGNAM X CUBE는\n기업 행사와 산업 전시에 특화된 하이엔드 이벤트 베뉴입니다.',
+                introSub: '부띠크모나코의 미학적 건축물이 주는 상징성과 넓은 오픈 플랜 구조는 컨퍼런스, 브랜드 런칭, 아트 페어 등 대규모 이벤트 기획에 최적화된 환경을 제공합니다.\n독보적인 규모와 압도적 접근성을 갖춘 공간에서 귀사의 비즈니스 이벤트를 성공적으로 개최하십시오.'
+            },
+            halls: {
+                a: { title: 'Grand Hall (A)', desc: '5m 이상의 높은 층고와 기둥 없는 광활한 공간을 자랑하는 메인 홀입니다.', area: '284㎡ (86평)', cap: '250명', height: '5.0m', img: 'main_grandhall.jpg' },
+                b: { title: 'Reception Hall (B)', desc: '우아한 채광과 미니멀한 디자인이 조화로운 리셉션 전용 공간입니다.', area: '205㎡ (62평)', cap: '100명', height: '3.5m', img: 'main_reception.jpg' },
+                c: { title: 'Studio Hall (C)', desc: '창의적인 영감을 자극하는 아늑하고 집중도 높은 공간입니다.', area: '280㎡ (85평)', cap: '150명', height: '3.2m', img: 'main_studio.jpg' }
+            }
+        };
+
         (function() {
+            function populateCMSFields() {
+                console.log("🚀 Initializing CMS Fields...");
+                const saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
+                
+                // 1. Fill Site Info
+                const si = saved.siteInfo || BMM_DEFAULT_DATA.siteInfo;
+                const siMap = {
+                    'cms-hero-title': si.heroTitle,
+                    'cms-hero-sub': si.heroSub,
+                    'cms-intro-main': si.introMain,
+                    'cms-intro-sub': si.introSub
+                };
+                for(let id in siMap) {
+                    const el = document.getElementById(id);
+                    if(el) el.value = siMap[id] || BMM_DEFAULT_DATA.siteInfo[id.replace('cms-','')];
+                }
+
+                // 2. Fill Hall Data
+                const halls = saved.halls || BMM_DEFAULT_DATA.halls;
+                ['a','b','c'].forEach(hid => {
+                    const h = (halls[hid] || BMM_DEFAULT_DATA.halls[hid]);
+                    const prefix = 'cms-hall-' + hid;
+                    if(document.getElementById(prefix + '-title')) document.getElementById(prefix + '-title').value = h.title;
+                    if(document.getElementById(prefix + '-desc')) document.getElementById(prefix + '-desc').value = h.desc;
+                    if(document.getElementById(prefix + '-area')) document.getElementById(prefix + '-area').value = h.area;
+                    if(document.getElementById(prefix + '-cap')) document.getElementById(prefix + '-cap').value = h.cap;
+                    if(document.getElementById(prefix + '-height')) document.getElementById(prefix + '-height').value = h.height;
+                    if(document.getElementById(prefix + '-img')) document.getElementById(prefix + '-img').value = h.img || '';
+                });
+                
+                console.log("✅ CMS Fields Populated Successfully");
+            }
+
             function setupMenu() {
                 const navItems = document.querySelectorAll('.nav-item');
                 const tabContents = document.querySelectorAll('.tab-content');
                 
-                if (navItems.length === 0) return;
-
                 navItems.forEach(item => {
                     item.addEventListener('click', function(e) {
-                        e.preventDefault();
                         const target = item.getAttribute('data-tab');
-                        console.log("Menu clicked:", target);
-                        
-                        // 1. UI Update
                         navItems.forEach(i => i.classList.remove('active'));
                         item.classList.add('active');
-                        
                         tabContents.forEach(content => {
                             content.style.display = content.id === 'tab-' + target ? 'block' : 'none';
-                            if (content.id === 'tab-' + target) content.classList.add('active');
-                            else content.classList.remove('active');
                         });
                         
-                        // 2. Title Update
-                        const titles = {
-                            inquiry: '통합 문의 관리',
-                            content: '웹 콘텐츠 관리 (CMS)',
-                            notice: '공지사항 관리',
-                            status: '공간 현황 및 일정',
-                            stats: '데이터 통계 분석',
-                            settings: '시스템 설정'
-                        };
-                        const headerTitle = document.getElementById('admin-header-title');
-                        if (headerTitle && titles[target]) headerTitle.innerText = titles[target];
-
-                        // 3. Trigger Data Load (if main.js is loaded)
+                        if (target === 'content') populateCMSFields();
                         if (target === 'inquiry' && window.renderInquiryList) window.renderInquiryList();
-                        if (target === 'content' && window.initCMS) window.initCMS();
-                        if (target === 'notice' && window.initAdminNotices) window.initAdminNotices();
-                        if (target === 'status' && window.initSpaceStatus) window.initSpaceStatus();
                     });
                 });
-                console.log("✅ Admin Menu System Initialized Directly");
 
-                // 4. Initial Data Load with Retry (Wait for main.js)
-                function tryInitialLoad() {
-                    const activeTab = document.querySelector('.nav-item.active');
-                    const target = activeTab ? activeTab.getAttribute('data-tab') : 'inquiry';
-                    
-                    if (window.renderInquiryList) {
-                        if (target === 'inquiry') window.renderInquiryList();
-                        if (target === 'content') window.initCMS();
-                        console.log("📊 Admin Data Auto-Loaded: " + target);
-                    } else {
-                        setTimeout(tryInitialLoad, 500);
-                    }
-                }
-                tryInitialLoad();
+                // Auto-run on load
+                populateCMSFields();
+                if (window.renderInquiryList) window.renderInquiryList();
+                else setTimeout(() => { if(window.renderInquiryList) window.renderInquiryList(); }, 1000);
             }
 
             if (document.readyState === 'loading') {
