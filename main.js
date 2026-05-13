@@ -488,43 +488,46 @@ function initAdminDashboard() {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             const target = item.getAttribute('data-tab');
+            
+            // 1. UI Update: Sidebar & Tabs
             navItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
 
             tabContents.forEach(content => {
                 content.style.display = content.id === `tab-${target}` ? 'block' : 'none';
+                // Also ensure the "active" class is toggled for CSS animations
+                if (content.id === `tab-${target}`) content.classList.add('active');
+                else content.classList.remove('active');
             });
 
-            // Update Header Title & Breadcrumb
+            // 2. Header Update
             const headerTitle = document.getElementById('admin-header-title');
             const headerBread = document.getElementById('admin-header-breadcrumb');
             const titles = {
                 inquiry: ['통합 문의 관리', '매니지먼트 / 대관 문의'],
-                estimate: ['견적서 관리 및 발송', '매니지먼트 / 견적서'],
-                content: ['웹 콘텐츠 관리', 'CMS / 사이트 편집'],
+                content: ['웹 콘텐츠 관리 (CMS)', 'CMS / 사이트 편집'],
                 notice: ['공지사항 관리', '커뮤니케이션 / 알림'],
                 status: ['공간 현황 및 일정', '운영 / 캘린더'],
                 stats: ['데이터 통계 분석', '매니지먼트 / 인사이트'],
-                planning: ['공간 기획 지원', '디자인 / 시뮬레이션'],
                 settings: ['시스템 설정', '관리 / 설정']
             };
 
             if (titles[target] && headerTitle && headerBread) {
-                headerTitle.innerHTML = `${titles[target][0]} <span style="font-size: 0.6rem; opacity: 0.3;">v1.07</span>`;
+                headerTitle.innerHTML = `${titles[target][0]} <span style="font-size: 0.6rem; opacity: 0.3;">v1.42</span>`;
                 headerBread.innerText = titles[target][1];
             }
 
+            // 3. Data Initialization for each tab
             if (target === 'inquiry') renderInquiryList();
-            if (target === 'estimate') initEstimateManager();
-            if (target === 'content') initCMS();
+            if (target === 'content') initCMS(); 
             if (target === 'notice') initAdminNotices();
             if (target === 'status') initSpaceStatus();
             if (target === 'stats') initAdminStats();
-            if (target === 'planning') initPlanningSupport();
             if (target === 'settings') initAdminSettingsAccounts();
         });
     });
 
+    // Default view: Inquiry
     renderInquiryList();
 
     // Logout Helper
