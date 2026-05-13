@@ -75,7 +75,8 @@ const DEFAULT_CONTENT = {
         email: 'museum@bmm.kr',
         partnership: 'biz@bmm.kr',
         hours: 'Weekdays / 09:30 AM ~ 06:30 PM\nWeekends & Holidays / Closed'
-    }
+    },
+    heroImg: 'main_grandhall.jpg'
 };
 
 // Global Variables
@@ -964,6 +965,10 @@ function initCMS() {
         document.getElementById('cms-gallery-urls').value = (content.gallery || []).join('\n');
     }
 
+    if (document.getElementById('cms-hero-img')) {
+        document.getElementById('cms-hero-img').value = content.heroImg || '';
+    }
+
     // Resource Management Logic
     const resList = document.getElementById('cms-resource-list');
     if (resList) {
@@ -1014,6 +1019,7 @@ function initCMS() {
                 newContent.halls[id].height = document.getElementById(`${p}-height`).value;
             });
             newContent.gallery = document.getElementById('cms-gallery-urls').value.split('\n').filter(l => l.trim());
+            newContent.heroImg = document.getElementById('cms-hero-img').value;
             
             const resItems = document.querySelectorAll('.cms-resource-item');
             newContent.resources = Array.from(resItems).map(item => ({
@@ -1521,6 +1527,14 @@ function renderNotices() {
 function renderContactInfo() {
     const saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
     const content = { ...DEFAULT_CONTENT, ...saved };
+    
+    // Update Hero Image
+    const hero = document.getElementById('main-hero-section');
+    if (hero) {
+        const heroUrl = content.heroImg || DEFAULT_CONTENT.heroImg;
+        hero.style.background = `url('${heroUrl}') no-repeat center center/cover`;
+    }
+
     const c = content.contact || DEFAULT_CONTENT.contact;
     const els = {
         'contact-address': c.address,
