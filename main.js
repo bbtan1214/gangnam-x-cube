@@ -592,6 +592,7 @@ function initAdminDashboard() {
             if (target === 'content') window.initCMS(); 
             if (target === 'notice') window.initAdminNotices();
             if (target === 'status') window.initSpaceStatus();
+            if (target === 'estimate') { if(typeof initEstimateManager === 'function') initEstimateManager(); }
             if (target === 'stats') window.initAdminStats();
             if (target === 'settings') window.initAdminSettingsAccounts();
         });
@@ -692,11 +693,7 @@ window.renderInquiryList = function() {
     const body = document.getElementById('inquiry-list-body');
     if (!body) return;
 
-    const q = query(collection(db, "inquiries"), orderBy("createdAt", "desc"));
-    
-    // Real-time listener for inquiries
-    onSnapshot(q, (snapshot) => {
-        const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const renderData = (list) => {
         body.innerHTML = list.length ? list.map((item) => `
             <tr>
                 <td><span class="status-chip ${item.status || 'pending'}">${item.status === 'confirmed' ? '확정' : '대기'}</span></td>
@@ -708,7 +705,7 @@ window.renderInquiryList = function() {
                 <td>${item.attachedFiles && item.attachedFiles.length > 0 ? item.attachedFiles[0] : '-'}</td>
                 <td><button class="edit-btn" onclick="window.showInquiryDetail('${item.id}')">상세/견적</button></td>
             </tr>
-        `).join('') : '<tr><td colspan="8" class="empty-state">내역이 없습니다.</td></tr>';
+        `).join('') : '<tr><td colspan="8" class="empty-state" style="text-align:center; padding:30px;">내역이 없습니다.</td></tr>';
 
         // Update Stats on Dashboard
         const total = document.getElementById('stat-total-inquires');
@@ -720,7 +717,24 @@ window.renderInquiryList = function() {
         
         // Expose list globally for modal access
         window.currentInquiryList = list;
-    });
+    };
+
+    try {
+        const q = query(collection(db, "inquiries"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderData(list);
+        }, (error) => {
+            console.error("Firestore onSnapshot error:", error);
+            // Fallback to localStorage if Firebase permissions fail
+            const localList = JSON.parse(localStorage.getItem('inquiryList') || '[]');
+            renderData(localList);
+        });
+    } catch(err) {
+        console.error("Firestore init error:", err);
+        const localList = JSON.parse(localStorage.getItem('inquiryList') || '[]');
+        renderData(localList);
+    }
 }
 
 
