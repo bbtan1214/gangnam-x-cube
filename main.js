@@ -624,6 +624,39 @@ function initAdminDashboard() {
         };
     }
 
+    const exportExcelBtn = document.getElementById('btn-export-excel');
+    if (exportExcelBtn) {
+        exportExcelBtn.onclick = () => {
+            const list = window.currentInquiryList || [];
+            if (list.length === 0) {
+                alert('추출할 데이터가 없습니다.');
+                return;
+            }
+            let csvContent = "\uFEFF상태,구분,문의자,업체,연락처,이메일,공간,희망 일정,첨부\n";
+            list.forEach(item => {
+                const row = [
+                    item.status === 'confirmed' ? '확정' : '대기',
+                    item.category || '기타',
+                    item.name || '무명',
+                    item.company || '-',
+                    item.phone || '-',
+                    item.email || '-',
+                    (item.halls || []).join(' '),
+                    item.period || '-',
+                    item.attachedFiles && item.attachedFiles.length > 0 ? item.attachedFiles[0] : '-'
+                ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+                csvContent += row + "\n";
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `대관문의내역_${new Date().toLocaleDateString().replace(/\./g, '')}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+    }
+
     window.resetCMSData = function() {
         if(confirm('모든 CMS 설정을 기본값으로 되돌리시겠습니까? 저장된 내용은 사라집니다.')) {
             localStorage.removeItem('siteContent_v3');

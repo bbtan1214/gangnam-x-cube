@@ -82,6 +82,9 @@
         <div class="admin-content">
             <!-- Inquiry Tab -->
             <div id="tab-inquiry" class="tab-content active">
+                <div style="display:flex; justify-content:flex-end; margin-bottom: 15px;">
+                    <button id="btn-export-excel" style="background:#217346; color:#fff; padding:8px 15px; border:none; cursor:pointer; font-weight:bold; border-radius:4px;">엑셀 추출 (CSV)</button>
+                </div>
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -276,6 +279,62 @@
                     <div id="status-calendar-grid" style="display:grid; grid-template-columns: repeat(7, 1fr); gap:2px; background:#eee; border:1px solid #eee;">
                         <!-- Calendar grid -->
                     </div>
+                </div>
+            </div>
+
+            <!-- Stats Tab -->
+            <div id="tab-stats" class="tab-content">
+                <div class="cms-card" style="margin-bottom: 20px;">
+                    <h4 style="margin-top:0;">데이터 통계 필터</h4>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input type="date" id="stats-date-start" class="cms-input" style="width:auto;">
+                        <span style="display:flex; align-items:center;">~</span>
+                        <input type="date" id="stats-date-end" class="cms-input" style="width:auto;">
+                        <button id="btn-stats-filter" class="save-btn" style="background:#000; color:#fff; padding:8px 15px; border:none; cursor:pointer;">조회</button>
+                        <button id="btn-stats-clear" class="save-btn" style="background:#eee; color:#333; padding:8px 15px; border:none; cursor:pointer;">초기화</button>
+                    </div>
+                </div>
+                <div class="cms-grid">
+                    <div class="cms-card">
+                        <h4 style="margin-top:0;">카테고리별 대관 문의 현황</h4>
+                        <div id="stats-category-chart" style="display:flex; gap:20px; align-items:flex-end; height:250px; padding-top:20px;"></div>
+                    </div>
+                    <div class="cms-card">
+                        <h4 style="margin-top:0;">공간별 예약 현황</h4>
+                        <div id="stats-hall-chart" style="display:flex; flex-direction:column; gap:15px; margin-top:20px;"></div>
+                    </div>
+                </div>
+            </div>
+<div class="cms-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h4 style="margin:0;">관리자 계정 관리</h4>
+                        <button id="btn-show-add-admin" class="save-btn" style="background:#000; color:#fff; padding:8px 15px; border:none; cursor:pointer;">+ 새 관리자 추가</button>
+                    </div>
+                    
+                    <div id="admin-add-form" style="display:none; background:#f9f9f9; padding:20px; border-radius:8px; margin-bottom:20px; border:1px solid #eee;">
+                        <h5 style="margin-top:0; margin-bottom:15px; font-size:1rem;">신규 매니저 계정 생성</h5>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
+                            <div class="input-group"><label style="font-size:0.75rem;">아이디</label><input type="text" id="new-admin-id" class="cms-input" style="width:100%;"></div>
+                            <div class="input-group"><label style="font-size:0.75rem;">이름(직급)</label><input type="text" id="new-admin-name" class="cms-input" style="width:100%;"></div>
+                            <div class="input-group"><label style="font-size:0.75rem;">비밀번호</label><input type="password" id="new-admin-pw" class="cms-input" style="width:100%;"></div>
+                        </div>
+                        <div style="text-align:right; margin-top:15px;">
+                            <button id="btn-save-new-admin" class="save-btn" style="background:#0055ff; color:#fff; padding:8px 25px; border:none; cursor:pointer; font-weight:bold;">생성하기</button>
+                        </div>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>계정 정보</th>
+                                <th>권한</th>
+                                <th>최근 로그인</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-account-list">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
