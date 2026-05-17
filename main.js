@@ -1,8 +1,8 @@
-import * as THREE from 'https://cdn.skypack.dev/three@0.160.0';
-import { OrbitControls } from 'https://cdn.skypack.dev/three@0.160.0/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'https://cdn.skypack.dev/three@0.160.0/examples/jsm/loaders/DRACOLoader.js';
-import gsap from 'https://cdn.skypack.dev/gsap';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import gsap from 'gsap';
 
 // --- GOOGLE CLOUD DB (FIRESTORE) INITIALIZATION ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -86,7 +86,7 @@ window.DEFAULT_CONTENT = {
         phone: '02.344.5042',
         email: 'info@planningkorea.com',
         partnership: 'info@planningkorea.com',
-        hours: 'Weekdays / 09:30 AM ~ 06:30 PM\nWeekends & Holidays / Closed'
+        hours: 'Weekdays / 09:30 AM ~ 05:00 PM\nWeekends & Holidays / Closed'
     },
     siteInfo: {
         heroTitle: 'GANGNAM X CUBE',
