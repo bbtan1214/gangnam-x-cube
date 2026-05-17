@@ -111,7 +111,7 @@
                 <strong>희망 기간:</strong> ${data.period}
             `;
 
-            document.getElementById('final-inquiry-form').onsubmit = (e) => {
+            document.getElementById('final-inquiry-form').onsubmit = async (e) => {
                 e.preventDefault();
                 
                 if (!document.getElementById('privacy-agree').checked) {
@@ -119,7 +119,6 @@
                     return;
                 }
 
-                const list = JSON.parse(localStorage.getItem('inquiryList') || '[]');
                 const newInquiry = {
                     ...data,
                     name: document.getElementById('user-name').value,
@@ -128,14 +127,23 @@
                     phone: document.getElementById('user-phone').value,
                     memo: document.getElementById('user-memo').value,
                     date: new Date().toLocaleDateString(),
-                    status: 'pending',
                     attachedFiles: document.getElementById('user-file').files[0] ? [document.getElementById('user-file').files[0].name] : []
                 };
-                list.push(newInquiry);
-                localStorage.setItem('inquiryList', JSON.stringify(list));
-                location.href = 'complete.html';
+
+                // Use the global function from main.js
+                if (window.submitInquiryToFirestore) {
+                    const success = await window.submitInquiryToFirestore(newInquiry);
+                    if (success) location.href = 'complete.html';
+                } else {
+                    // Fallback to localStorage if main.js is not yet ready
+                    const list = JSON.parse(localStorage.getItem('inquiryList') || '[]');
+                    list.push({ ...newInquiry, status: 'pending' });
+                    localStorage.setItem('inquiryList', JSON.stringify(list));
+                    location.href = 'complete.html';
+                }
             };
         });
     </script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>

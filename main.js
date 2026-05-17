@@ -4,7 +4,18 @@ import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.160.0/examples/jsm/l
 import { DRACOLoader } from 'https://cdn.skypack.dev/three@0.160.0/examples/jsm/loaders/DRACOLoader.js';
 import gsap from 'https://cdn.skypack.dev/gsap';
 
-console.log("🛠️ BMM Script Loading... v1.39");
+// --- GOOGLE CLOUD DB (FIRESTORE) INITIALIZATION ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { 
+    getFirestore, doc, getDoc, setDoc, collection, addDoc, 
+    query, orderBy, onSnapshot, updateDoc, deleteDoc, serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { firebaseConfig } from "./firebaseConfig.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+console.log("🛠️ GANGNAM X CUBE System Loading... v1.50 (Cloud Powered)");
 window.addEventListener('error', (e) => {
     console.error("❌ Global Script Error:", e.message, "at", e.filename, ":", e.lineno);
 });
@@ -72,9 +83,9 @@ window.DEFAULT_CONTENT = {
     contact: {
         address: '서울특별시 서초구 서초대로 397 부티크 모나코 (B1 뮤지엄)',
         addressEn: 'B1 Museum, Boutique Monaco, 397, Seocho-daero, Seocho-gu, Seoul, Korea',
-        phone: '02-535-5875',
-        email: 'museum@bmm.kr',
-        partnership: 'biz@bmm.kr',
+        phone: '02.344.5042',
+        email: 'info@planningkorea.com',
+        partnership: 'info@planningkorea.com',
         hours: 'Weekdays / 09:30 AM ~ 06:30 PM\nWeekends & Holidays / Closed'
     },
     siteInfo: {
@@ -286,8 +297,23 @@ window.resolveImageUrl = (url) => {
     return url;
 };
 
-function loadSiteContent() {
-    const saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
+async function loadSiteContent() {
+    let saved = {};
+    try {
+        const docRef = doc(db, "settings", "siteContent_v3");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            saved = docSnap.data();
+            console.log("📡 Cloud Data Loaded:", saved);
+        } else {
+            console.log("ℹ️ No Cloud Data, using LocalStorage or Defaults");
+            saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
+        }
+    } catch (e) {
+        console.error("❌ Firestore Load Error:", e);
+        saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
+    }
+
     const content = { ...DEFAULT_CONTENT, ...saved };
     
     // Deep merge halls and siteInfo to ensure no fields are lost
@@ -562,17 +588,17 @@ function initAdminDashboard() {
             }
 
             // 3. Data Initialization for each tab
-            if (target === 'inquiry') renderInquiryList();
-            if (target === 'content') initCMS(); 
-            if (target === 'notice') initAdminNotices();
-            if (target === 'status') initSpaceStatus();
-            if (target === 'stats') initAdminStats();
-            if (target === 'settings') initAdminSettingsAccounts();
+            if (target === 'inquiry') window.renderInquiryList();
+            if (target === 'content') window.initCMS(); 
+            if (target === 'notice') window.initAdminNotices();
+            if (target === 'status') window.initSpaceStatus();
+            if (target === 'stats') window.initAdminStats();
+            if (target === 'settings') window.initAdminSettingsAccounts();
         });
     });
 
     // Default view: Inquiry
-    renderInquiryList();
+    window.renderInquiryList();
 
     // Logout Helper
 
@@ -597,6 +623,13 @@ function initAdminDashboard() {
             URL.revokeObjectURL(url);
         };
     }
+
+    window.resetCMSData = function() {
+        if(confirm('모든 CMS 설정을 기본값으로 되돌리시겠습니까? 저장된 내용은 사라집니다.')) {
+            localStorage.removeItem('siteContent_v3');
+            location.reload();
+        }
+    };
 
     const importTrigger = document.getElementById('btn-import-trigger');
     const importFile = document.getElementById('file-import-data');
@@ -625,27 +658,36 @@ function initAdminDashboard() {
 window.renderInquiryList = function() {
     const body = document.getElementById('inquiry-list-body');
     if (!body) return;
-    const list = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-    body.innerHTML = list.length ? list.map((item, idx) => `
-        <tr>
-            <td><span class="status-chip ${item.status || 'pending'}">${item.status === 'confirmed' ? '확정' : '대기'}</span></td>
-            <td><strong>${item.category || '기타'}</strong></td>
-            <td><strong>${item.name || '무명'}</strong><br><small style="opacity:0.5;">${item.company || '-'}</small></td>
-            <td>${item.phone || '-'}<br><small style="opacity:0.5;">${item.email || '-'}</small></td>
-            <td>${(item.halls || []).join(', ')}</td>
-            <td>${item.period || (item.startDate + ' ~ ' + item.endDate)}</td>
-            <td>${item.attachedFiles && item.attachedFiles.length > 0 ? item.attachedFiles[0] : '-'}</td>
-            <td><button class="edit-btn" onclick="window.showInquiryDetail(${idx})">상세/견적</button></td>
-        </tr>
-    `).join('') : '<tr><td colspan="8" class="empty-state">내역이 없습니다.</td></tr>';
 
-    // Update Stats on Dashboard
-    const total = document.getElementById('stat-total-inquires');
-    if (total) total.innerText = list.length;
-    const pending = document.getElementById('stat-pending-inquires');
-    if (pending) pending.innerText = list.filter(i => i.status !== 'confirmed').length;
-    const confirmed = document.getElementById('stat-confirmed-inquires');
-    if (confirmed) confirmed.innerText = list.filter(i => i.status === 'confirmed').length;
+    const q = query(collection(db, "inquiries"), orderBy("createdAt", "desc"));
+    
+    // Real-time listener for inquiries
+    onSnapshot(q, (snapshot) => {
+        const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        body.innerHTML = list.length ? list.map((item) => `
+            <tr>
+                <td><span class="status-chip ${item.status || 'pending'}">${item.status === 'confirmed' ? '확정' : '대기'}</span></td>
+                <td><strong>${item.category || '기타'}</strong></td>
+                <td><strong>${item.name || '무명'}</strong><br><small style="opacity:0.5;">${item.company || '-'}</small></td>
+                <td>${item.phone || '-'}<br><small style="opacity:0.5;">${item.email || '-'}</small></td>
+                <td>${(item.halls || []).join(', ')}</td>
+                <td>${item.period || '-'}</td>
+                <td>${item.attachedFiles && item.attachedFiles.length > 0 ? item.attachedFiles[0] : '-'}</td>
+                <td><button class="edit-btn" onclick="window.showInquiryDetail('${item.id}')">상세/견적</button></td>
+            </tr>
+        `).join('') : '<tr><td colspan="8" class="empty-state">내역이 없습니다.</td></tr>';
+
+        // Update Stats on Dashboard
+        const total = document.getElementById('stat-total-inquires');
+        if (total) total.innerText = list.length;
+        const pendingCount = document.getElementById('stat-pending-inquires');
+        if (pendingCount) pendingCount.innerText = list.filter(i => i.status !== 'confirmed').length;
+        const confirmedCount = document.getElementById('stat-confirmed-inquires');
+        if (confirmedCount) confirmedCount.innerText = list.filter(i => i.status === 'confirmed').length;
+        
+        // Expose list globally for modal access
+        window.currentInquiryList = list;
+    });
 }
 
 
@@ -1070,13 +1112,13 @@ window.initCMS = function() {
 
     const saveBtn = document.getElementById('btn-save-cms');
     if (saveBtn) {
-        saveBtn.onclick = () => {
+        saveBtn.onclick = async () => {
             const newContent = { ...content };
             ['A', 'B', 'C'].forEach(id => {
                 const p = `cms-hall-${id.toLowerCase()}`;
+                if (!newContent.halls[id]) newContent.halls[id] = {};
                 newContent.halls[id].title = document.getElementById(`${p}-title`).value;
                 newContent.halls[id].img = document.getElementById(`${p}-img`).value;
-                newContent.halls[id].gallery = document.getElementById(`${p}-gallery`).value.split('\n').filter(l => l.trim());
                 newContent.halls[id].desc = document.getElementById(`${p}-desc`).value;
                 newContent.halls[id].area = document.getElementById(`${p}-area`).value;
                 newContent.halls[id].cap = document.getElementById(`${p}-cap`).value;
@@ -1109,8 +1151,19 @@ window.initCMS = function() {
                 url: item.querySelector('.res-url').value
             }));
 
-            localStorage.setItem('siteContent_v3', JSON.stringify(newContent));
-            alert('콘텐츠가 성공적으로 저장되었습니다.');
+            try {
+                saveBtn.disabled = true;
+                saveBtn.innerText = "저장 중...";
+                await setDoc(doc(db, "settings", "siteContent_v3"), newContent);
+                localStorage.setItem('siteContent_v3', JSON.stringify(newContent));
+                alert('☁️ 구글 클라우드 DB에 성공적으로 저장되었습니다!');
+            } catch (e) {
+                console.error("Save Error:", e);
+                alert('❌ 저장 실패: ' + e.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerText = "변경사항 최종 저장하기";
+            }
         };
     }
 
@@ -1427,11 +1480,30 @@ window.deleteProposal = (idx) => {
 };
 
 /**
+ * Inquiry Submission Logic (Global)
+ */
+window.submitInquiryToFirestore = async function(inquiryData) {
+    try {
+        console.log("📤 Submitting to Cloud:", inquiryData);
+        const docRef = await addDoc(collection(db, "inquiries"), {
+            ...inquiryData,
+            createdAt: serverTimestamp(),
+            status: 'pending'
+        });
+        console.log("✅ Submission Success. ID:", docRef.id);
+        return true;
+    } catch (e) {
+        console.error("❌ Submission Error:", e);
+        alert("데이터 저장 중 오류가 발생했습니다: " + e.message);
+        return false;
+    }
+};
+
+/**
  * Inquiry Detail Modal Logic
  */
-window.showInquiryDetail = function(idx) {
-    const list = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-    const item = list[idx];
+window.showInquiryDetail = function(id) {
+    const item = (window.currentInquiryList || []).find(i => i.id === id);
     if (!item) return;
 
     const modal = document.getElementById('inquiry-detail-modal');
@@ -1440,8 +1512,8 @@ window.showInquiryDetail = function(idx) {
     body.innerHTML = `
         <div style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end;">
             <div>
-                <span style="font-size: 0.75rem; letter-spacing: 0.1em; color: #888; text-transform: uppercase;">Registration Number</span>
-                <h4 style="margin: 5px 0 0; font-size: 1.4rem; font-family: 'Fraunces', serif;">INQ-${2026000 + idx}</h4>
+                <span style="font-size: 0.75rem; letter-spacing: 0.1em; color: #888; text-transform: uppercase;">Cloud ID</span>
+                <h4 style="margin: 5px 0 0; font-size: 1.1rem; font-family: 'Fraunces', serif;">${id}</h4>
             </div>
             <span class="status-chip ${item.status || 'pending'}" style="padding: 6px 15px; font-size: 0.8rem;">${item.status === 'confirmed' ? '예약 확정됨' : '상담 대기중'}</span>
         </div>
@@ -1459,7 +1531,7 @@ window.showInquiryDetail = function(idx) {
                 <label style="display: block; font-size: 0.7rem; font-weight: 700; color: #999; margin-bottom: 10px; text-transform: uppercase;">Reservation Data</label>
                 <div style="font-size: 1rem; line-height: 1.8;">
                     <strong style="color: #0055ff;">${(item.halls || []).join(', ')}</strong><br>
-                    <strong>${item.period || (item.startDate + ' ~ ' + item.endDate)}</strong><br>
+                    <strong>${item.period || '-'}</strong><br>
                     <span style="color: #888; font-size: 0.85rem;">신청일: ${item.date || '-'}</span>
                 </div>
             </div>
@@ -1490,8 +1562,8 @@ window.showInquiryDetail = function(idx) {
     modal.style.display = 'flex';
 
     // Button Logic
-    document.getElementById('btn-confirm-inq').onclick = () => window.confirmInquiry(idx);
-    document.getElementById('btn-delete-inq').onclick = () => window.deleteInquiry(idx);
+    document.getElementById('btn-confirm-inq').onclick = () => window.confirmInquiry(id);
+    document.getElementById('btn-delete-inq').onclick = () => window.deleteInquiry(id);
     
     // Add Estimate View Button in Modal (Injecting a new button)
     const footer = modal.querySelector('.modal-footer');
@@ -1501,28 +1573,27 @@ window.showInquiryDetail = function(idx) {
         estBtn.className = 'save-btn';
         estBtn.style = 'background:#555; color:#fff; padding:10px 25px; margin-right:10px;';
         estBtn.innerText = '견적서 생성';
-        estBtn.onclick = () => window.openEstimate(idx);
+        estBtn.onclick = () => window.openEstimate(id);
         footer.insertBefore(estBtn, document.getElementById('btn-confirm-inq'));
     }
 };
 
-window.openEstimate = (idx) => {
-    const list = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-    const inq = list[idx];
-    if (!inq) return;
+window.openEstimate = (id) => {
+    const item = (window.currentInquiryList || []).find(i => i.id === id);
+    if (!item) return;
 
     const modal = document.getElementById('estimate-modal');
     modal.style.display = 'block';
 
     // Fill Estimate Data
-    document.getElementById('est-receiver').innerText = `${inq.company || inq.name} 귀하`;
-    document.getElementById('est-date').innerText = inq.date || new Date().toLocaleDateString();
+    document.getElementById('est-receiver').innerText = `${item.company || item.name} 귀하`;
+    document.getElementById('est-date').innerText = item.date || new Date().toLocaleDateString();
 
     // Rates (Standard)
     const rates = { 'Reception Hall': 3500000, 'Grand Main Hall': 8500000, 'Private Studio': 2500000 };
     let html = '';
     let total = 0;
-    const halls = inq.halls || [];
+    const halls = item.halls || [];
     
     halls.forEach(h => {
         const rate = rates[h] || 5000000;
@@ -1553,25 +1624,32 @@ window.closeInquiryDetail = function() {
     document.getElementById('inquiry-detail-modal').style.display = 'none';
 };
 
-window.confirmInquiry = function(idx) {
-    let list = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-    if (list[idx]) {
-        list[idx].status = 'confirmed';
-        list[idx].manager = document.getElementById('inq-manager').value;
-        localStorage.setItem('inquiryList', JSON.stringify(list));
+window.confirmInquiry = async function(id) {
+    if (!id) return;
+    try {
+        const manager = document.getElementById('inq-manager').value;
+        await updateDoc(doc(db, "inquiries", id), {
+            status: 'confirmed',
+            manager: manager
+        });
         window.closeInquiryDetail();
-        initAdminDashboard();
-        alert(`예약이 확정되었으며, 담당자(${list[idx].manager})가 지정되었습니다.`);
+        alert(`☁️ 클라우드 DB 업데이트 완료: 예약이 확정되었습니다.`);
+    } catch (e) {
+        console.error("Confirm Error:", e);
+        alert("업데이트 실패: " + e.message);
     }
 };
 
-window.deleteInquiry = function(idx) {
-    if (confirm('해당 대관 문의 내역을 정말 삭제하시겠습니까?')) {
-        let list = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-        list.splice(idx, 1);
-        localStorage.setItem('inquiryList', JSON.stringify(list));
-        window.closeInquiryDetail();
-        initAdminDashboard();
+window.deleteInquiry = async function(id) {
+    if (confirm('해당 대관 문의 내역을 정말 삭제하시겠습니까? (클라우드 DB에서 영구 삭제됩니다)')) {
+        try {
+            await deleteDoc(doc(db, "inquiries", id));
+            window.closeInquiryDetail();
+            alert("🗑️ 삭제 완료");
+        } catch (e) {
+            console.error("Delete Error:", e);
+            alert("삭제 실패: " + e.message);
+        }
     }
 };
 
