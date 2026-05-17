@@ -1386,13 +1386,39 @@ window.initAdminNotices = function() {
     const listBody = document.getElementById('cms-notice-list-body');
     if (!listBody) return;
     const content = JSON.parse(localStorage.getItem('siteContent_v3')) || DEFAULT_CONTENT;
-    listBody.innerHTML = (content.notices || []).map((n, idx) => `
+    if (!content.notices) content.notices = [];
+    listBody.innerHTML = content.notices.map((n, idx) => `
         <tr>
             <td>${n.date}</td>
             <td><strong>${n.title}</strong></td>
-            <td><button class="delete-btn" onclick="window.deleteNotice(${idx})">삭제</button></td>
+            <td><button class="delete-btn" onclick="window.deleteNotice(${idx})" style="background:#ff4444; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">삭제</button></td>
         </tr>
     `).join('');
+
+    const addBtn = document.getElementById('btn-add-notice');
+    if (addBtn && !addBtn.dataset.bound) {
+        addBtn.dataset.bound = 'true';
+        addBtn.onclick = () => {
+            const title = document.getElementById('new-notice-title').value.trim();
+            let date = document.getElementById('new-notice-date').value;
+            if (!title) { alert('제목을 입력하세요.'); return; }
+            if (!date) {
+                const today = new Date();
+                date = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')}`;
+            } else {
+                date = date.replace(/-/g, '.');
+            }
+            
+            const curContent = JSON.parse(localStorage.getItem('siteContent_v3')) || DEFAULT_CONTENT;
+            if (!curContent.notices) curContent.notices = [];
+            curContent.notices.unshift({ date, title });
+            localStorage.setItem('siteContent_v3', JSON.stringify(curContent));
+            
+            document.getElementById('new-notice-title').value = '';
+            document.getElementById('new-notice-date').value = '';
+            window.initAdminNotices();
+        };
+    }
 }
 
 window.deleteNotice = (idx) => {

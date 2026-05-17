@@ -3,7 +3,7 @@ Allow: /
 Disallow: /admin/
 Disallow: /private/
 
-Sitemap: https://gangnamxcube.kr/sitemap.xml
+Sitemap: https://gangnamxcube.com/sitemap.xml
 
 
 
