@@ -193,16 +193,56 @@
                     </div>
                 </div>
 
-                <div style="margin-top:40px; display:grid; grid-template-columns: 1fr 2fr; gap:30px;">
-                    <div class="cms-card">
-                        <h4>글로벌 갤러리 이미지</h4>
-                        <label style="font-size:0.7rem; color:#888;">이미지 URL을 한 줄에 하나씩 입력하세요.</label>
-                        <textarea id="cms-gallery-urls" class="cms-textarea" style="width:100%; height:120px; margin-top:10px;"></textarea>
+                <div style="margin-top:40px;" class="cms-grid">
+                    <!-- Gallery Images Management -->
+                    <div class="cms-card" style="grid-column: span 2;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <h4 style="margin:0;">글로벌 갤러리 이미지 관리</h4>
+                            <div style="display:flex; gap:8px;">
+                                <button id="btn-gallery-upload" class="save-btn" style="padding:8px 20px; background:#333; font-size:0.8rem;">📷 이미지 업로드</button>
+                                <input type="file" id="file-gallery-upload" style="display:none" multiple accept="image/*">
+                                <button id="btn-gallery-url-add" class="save-btn" style="padding:8px 20px; background:#666; font-size:0.8rem;">🔗 URL 추가</button>
+                            </div>
+                        </div>
+                        <p style="font-size:0.75rem; color:#999; margin-bottom:15px;">갤러리에 표시할 이미지를 업로드하거나 URL을 입력하세요. 드래그 앤 드롭도 지원됩니다.</p>
+                        <div id="cms-gallery-preview" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:12px; margin-bottom:15px; min-height:100px; border:2px dashed #eee; padding:15px; border-radius:8px;">
+                            <!-- Gallery preview thumbnails will be rendered here -->
+                        </div>
+                        <textarea id="cms-gallery-urls" class="cms-textarea" style="width:100%; height:80px; font-size:0.75rem; color:#666;" placeholder="이미지 경로가 자동으로 기록됩니다."></textarea>
                     </div>
+                </div>
+
+                <div style="margin-top:20px; display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
+                    <!-- Hero Image Management -->
                     <div class="cms-card">
-                        <h4>메인 히어로 이미지</h4>
-                        <label style="font-size:0.7rem; color:#888;">메인 페이지 상단 배경 이미지 경로</label>
-                        <input type="text" id="cms-hero-img" class="cms-input" style="margin-top:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <h4 style="margin:0;">메인 히어로 이미지</h4>
+                            <div style="display:flex; gap:8px;">
+                                <button id="btn-hero-upload" class="save-btn" style="padding:8px 16px; background:#333; font-size:0.8rem;">📷 업로드</button>
+                                <input type="file" id="file-hero-upload" style="display:none" accept="image/*">
+                            </div>
+                        </div>
+                        <p style="font-size:0.75rem; color:#999; margin-bottom:10px;">메인 페이지 상단 배경 이미지</p>
+                        <div id="cms-hero-preview" style="width:100%; height:160px; border:2px dashed #eee; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#fafafa; margin-bottom:10px;">
+                            <span style="color:#ccc; font-size:0.8rem;">미리보기</span>
+                        </div>
+                        <input type="text" id="cms-hero-img" class="cms-input" placeholder="이미지 경로 또는 URL" style="font-size:0.8rem;">
+                    </div>
+
+                    <!-- Upload Status -->
+                    <div class="cms-card">
+                        <h4>업로드 상태</h4>
+                        <div id="msg-box" style="display:none; margin-top:10px; padding:15px; background:#e6f7ef; color:#00c853; font-size:0.85rem; border-radius:4px;">
+                            <div>대기 중...</div>
+                        </div>
+                        <div style="margin-top:15px; padding:15px; background:#f9f9f9; border-radius:8px;">
+                            <p style="font-size:0.75rem; color:#888; margin:0 0 8px;">💡 <strong>안내사항</strong></p>
+                            <ul style="font-size:0.7rem; color:#999; margin:0; padding-left:16px; line-height:1.8;">
+                                <li>이미지는 자동으로 최적화(최대 1200px)되어 저장됩니다.</li>
+                                <li>LocalStorage 용량 제한(약 5MB)이 있으니 고화질 이미지가 많을 경우 URL 방식을 권장합니다.</li>
+                                <li>업로드 후 반드시 <strong>[변경사항 최종 저장하기]</strong> 버튼을 눌러주세요.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
@@ -230,19 +270,6 @@
                             <div class="input-group"><label>이메일</label><input type="text" id="cms-contact-email" class="cms-input"></div>
                             <div class="input-group"><label>비즈니스 파트너십</label><input type="text" id="cms-contact-partnership" class="cms-input"></div>
                             <div class="input-group"><label>운영 시간 (줄바꿈은 \n 사용)</label><textarea id="cms-contact-hours" class="cms-textarea" style="height:60px;"></textarea></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="margin-top:30px; display:grid; grid-template-columns: 1fr 2fr; gap:30px;">
-                    <div class="cms-card">
-                        <h4>이미지 업로드 존</h4>
-                        <div id="cms-upload-zone" style="border: 2px dashed #ccc; padding:60px; text-align:center; border-radius:8px; cursor:pointer;">
-                            <p style="margin:0; color:#999;">여기에 이미지를 드래그 앤 드롭하거나 클릭하여 업로드</p>
-                            <input type="file" id="cms-file-input" style="display:none" multiple accept="image/*">
-                        </div>
-                        <div id="msg-box" style="display:none; margin-top:20px; padding:15px; background:#e6f7ef; color:#00c853; font-size:0.85rem; border-radius:4px;">
-                            <div>성공적으로 업로드되었습니다.</div>
                         </div>
                     </div>
                 </div>

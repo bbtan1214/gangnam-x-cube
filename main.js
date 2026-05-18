@@ -1234,59 +1234,127 @@ window.initCMS = function() {
     }
 
     // Global Upload Zone Logic
-    const uploadZone = document.getElementById('cms-upload-zone');
-    const fileInput = document.getElementById('cms-file-input');
+    // === Gallery Upload Logic ===
+    const galleryUploadBtn = document.getElementById('btn-gallery-upload');
+    const galleryFileInput = document.getElementById('file-gallery-upload');
+    const galleryUrlAddBtn = document.getElementById('btn-gallery-url-add');
+    const galleryPreview = document.getElementById('cms-gallery-preview');
 
-    if (uploadZone && fileInput) {
-        uploadZone.onclick = () => fileInput.click();
-        
-        uploadZone.ondragover = (e) => { e.preventDefault(); uploadZone.style.background = '#f0f0f0'; };
-        uploadZone.ondragleave = (e) => { e.preventDefault(); uploadZone.style.background = ''; };
-        uploadZone.ondrop = (e) => {
-            e.preventDefault();
-            uploadZone.style.background = '';
-            if (e.dataTransfer.files.length) handleGlobalUpload(e.dataTransfer.files);
+    // Render gallery preview thumbnails
+    function renderGalleryPreview() {
+        if (!galleryPreview) return;
+        const textarea = document.getElementById('cms-gallery-urls');
+        if (!textarea) return;
+        const urls = textarea.value.split('\n').filter(u => u.trim());
+        galleryPreview.innerHTML = urls.length > 0 ? urls.map((url, i) => `
+            <div style="position:relative; border-radius:8px; overflow:hidden; border:1px solid #eee; aspect-ratio:1; background:#f5f5f5;">
+                <img src="${window.resolveImageUrl(url.trim())}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://placehold.co/150x150?text=Error'">
+                <button onclick="window.removeGalleryImage(${i})" style="position:absolute; top:4px; right:4px; width:24px; height:24px; border-radius:50%; border:none; background:rgba(0,0,0,0.6); color:#fff; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;">×</button>
+            </div>
+        `).join('') : '<div style="grid-column:1/-1; text-align:center; padding:30px; color:#ccc;">이미지를 업로드하거나 URL을 추가하세요</div>';
+    }
+
+    window.removeGalleryImage = (idx) => {
+        const textarea = document.getElementById('cms-gallery-urls');
+        if (!textarea) return;
+        const urls = textarea.value.split('\n').filter(u => u.trim());
+        urls.splice(idx, 1);
+        textarea.value = urls.join('\n');
+        renderGalleryPreview();
+    };
+
+    if (galleryUploadBtn && galleryFileInput) {
+        galleryUploadBtn.onclick = () => galleryFileInput.click();
+        galleryFileInput.onchange = (e) => {
+            if (e.target.files.length) handleGalleryUpload(e.target.files);
         };
-        
-        fileInput.onchange = (e) => {
-            if (e.target.files.length) handleGlobalUpload(e.target.files);
-        };
-        
-        function handleGlobalUpload(files) {
-            const textarea = document.getElementById('cms-gallery-urls');
-            if (!textarea) return;
-            
-            const msg = document.getElementById('msg-box');
-            if (msg) {
-                msg.querySelector('div').innerText = `갤러리 이미지 처리 중...`;
-                msg.style.display = 'block';
-            }
-            
-            let processed = 0;
-            let keys = [];
-            for(let i=0; i<files.length; i++) {
-                if(!files[i].type.startsWith('image/')) {
-                    processed++;
-                    continue;
+    }
+
+    if (galleryUrlAddBtn) {
+        galleryUrlAddBtn.onclick = () => {
+            const url = prompt('갤러리에 추가할 이미지 URL을 입력하세요:');
+            if (url && url.trim()) {
+                const textarea = document.getElementById('cms-gallery-urls');
+                if (textarea) {
+                    const cur = textarea.value.trim();
+                    textarea.value = cur ? cur + '\n' + url.trim() : url.trim();
+                    renderGalleryPreview();
                 }
-                window.processImageUpload(files[i], (key) => {
-                    keys.push(key);
-                    processed++;
-                    if (processed === files.length) {
-                        const currentVal = textarea.value.trim();
-                        const newVal = currentVal ? currentVal + '\n' + keys.join('\n') : keys.join('\n');
-                        textarea.value = newVal;
-                        
-                        if (msg) {
-                            msg.querySelector('div').innerText = `갤러리 이미지 업로드 완료! '저장' 버튼을 눌러 확정하세요.`;
-                            setTimeout(() => { msg.style.display = 'none'; }, 3000);
-                        }
-                        fileInput.value = '';
-                    }
-                });
             }
+        };
+    }
+
+    // Drag and drop on gallery preview area
+    if (galleryPreview) {
+        galleryPreview.ondragover = (e) => { e.preventDefault(); galleryPreview.style.borderColor = '#000'; };
+        galleryPreview.ondragleave = (e) => { e.preventDefault(); galleryPreview.style.borderColor = '#eee'; };
+        galleryPreview.ondrop = (e) => {
+            e.preventDefault();
+            galleryPreview.style.borderColor = '#eee';
+            if (e.dataTransfer.files.length) handleGalleryUpload(e.dataTransfer.files);
+        };
+    }
+
+    function handleGalleryUpload(files) {
+        const textarea = document.getElementById('cms-gallery-urls');
+        if (!textarea) return;
+        const msg = document.getElementById('msg-box');
+        if (msg) { msg.querySelector('div').innerText = '갤러리 이미지 처리 중...'; msg.style.display = 'block'; }
+        let processed = 0;
+        let keys = [];
+        for (let i = 0; i < files.length; i++) {
+            if (!files[i].type.startsWith('image/')) { processed++; continue; }
+            window.processImageUpload(files[i], (key) => {
+                keys.push(key);
+                processed++;
+                if (processed === files.length) {
+                    const cur = textarea.value.trim();
+                    textarea.value = cur ? cur + '\n' + keys.join('\n') : keys.join('\n');
+                    renderGalleryPreview();
+                    if (msg) { msg.querySelector('div').innerText = `✅ ${keys.length}개 이미지 업로드 완료! [저장] 버튼을 눌러 확정하세요.`; setTimeout(() => { msg.style.display = 'none'; }, 4000); }
+                    galleryFileInput.value = '';
+                }
+            });
         }
     }
+
+    // === Hero Image Upload Logic ===
+    const heroUploadBtn = document.getElementById('btn-hero-upload');
+    const heroFileInput = document.getElementById('file-hero-upload');
+    const heroPreview = document.getElementById('cms-hero-preview');
+    const heroInput = document.getElementById('cms-hero-img');
+
+    function renderHeroPreview() {
+        if (!heroPreview || !heroInput) return;
+        const url = heroInput.value.trim();
+        if (url) {
+            heroPreview.innerHTML = `<img src="${window.resolveImageUrl(url)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.parentElement.innerHTML='<span style=\\'color:#f44\\'>이미지 로드 실패</span>'">`;
+        } else {
+            heroPreview.innerHTML = '<span style="color:#ccc; font-size:0.8rem;">미리보기</span>';
+        }
+    }
+
+    if (heroUploadBtn && heroFileInput) {
+        heroUploadBtn.onclick = () => heroFileInput.click();
+        heroFileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+            const msg = document.getElementById('msg-box');
+            if (msg) { msg.querySelector('div').innerText = '히어로 이미지 처리 중...'; msg.style.display = 'block'; }
+            window.processImageUpload(file, (key) => {
+                if (heroInput) { heroInput.value = key; renderHeroPreview(); }
+                if (msg) { msg.querySelector('div').innerText = '✅ 히어로 이미지 업로드 완료! [저장] 버튼을 눌러 확정하세요.'; setTimeout(() => { msg.style.display = 'none'; }, 4000); }
+                heroFileInput.value = '';
+            });
+        };
+    }
+
+    // Update preview when text input changes manually
+    if (heroInput) heroInput.onchange = renderHeroPreview;
+
+    // Initial renders
+    renderGalleryPreview();
+    renderHeroPreview();
 }
 
 window.processResourceUpload = (input) => {
