@@ -298,20 +298,26 @@ window.resolveImageUrl = (url) => {
 };
 
 async function loadSiteContent() {
-    let saved = {};
+    // Always use localStorage as the primary source (admin saves here first)
+    let saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
+    console.log("💾 LocalStorage Data Loaded:", Object.keys(saved).length > 0 ? 'Found' : 'Empty');
+
+    // Try Firestore as secondary/backup source
     try {
         const docRef = doc(db, "settings", "siteContent_v3");
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-            saved = docSnap.data();
-            console.log("📡 Cloud Data Loaded:", saved);
-        } else {
-            console.log("ℹ️ No Cloud Data, using LocalStorage or Defaults");
-            saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
+            const cloudData = docSnap.data();
+            console.log("📡 Cloud Data Available");
+            // Only use cloud data if localStorage is empty (fresh browser)
+            if (Object.keys(saved).length === 0) {
+                saved = cloudData;
+                localStorage.setItem('siteContent_v3', JSON.stringify(saved));
+                console.log("📡 Using Cloud Data (localStorage was empty)");
+            }
         }
     } catch (e) {
-        console.error("❌ Firestore Load Error:", e);
-        saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
+        console.warn("⚠️ Firestore unavailable, using local data only:", e.message);
     }
 
     const content = { ...DEFAULT_CONTENT, ...saved };
