@@ -319,14 +319,17 @@ async function loadSiteContent() {
     } catch (e) {
         console.warn("⚠️ Firestore unavailable, using local data only:", e.message);
     }
-
-    const content = { ...DEFAULT_CONTENT, ...saved };
+    const hasSavedData = Object.keys(saved).length > 0;
+    const content = hasSavedData ? { ...DEFAULT_CONTENT, ...saved } : { ...DEFAULT_CONTENT };
     
-    // Deep merge halls and siteInfo to ensure no fields are lost
-    content.halls = saved && saved.halls ? { ...DEFAULT_CONTENT.halls, ...saved.halls } : DEFAULT_CONTENT.halls;
-    content.siteInfo = saved && saved.siteInfo ? { ...DEFAULT_CONTENT.siteInfo, ...saved.siteInfo } : DEFAULT_CONTENT.siteInfo;
-    content.contact = saved && saved.contact ? { ...DEFAULT_CONTENT.contact, ...saved.contact } : DEFAULT_CONTENT.contact;
-    if (!content.notices || content.notices.length === 0) content.notices = DEFAULT_CONTENT.notices;
+    // Deep merge only when saved data exists but might be missing sub-fields
+    if (hasSavedData) {
+        content.halls = saved.halls ? { ...DEFAULT_CONTENT.halls, ...saved.halls } : (saved.halls !== undefined ? saved.halls : DEFAULT_CONTENT.halls);
+        content.siteInfo = saved.siteInfo ? { ...DEFAULT_CONTENT.siteInfo, ...saved.siteInfo } : (saved.siteInfo !== undefined ? saved.siteInfo : DEFAULT_CONTENT.siteInfo);
+        content.contact = saved.contact ? { ...DEFAULT_CONTENT.contact, ...saved.contact } : (saved.contact !== undefined ? saved.contact : DEFAULT_CONTENT.contact);
+        // Respect empty notices - don't force defaults if admin cleared them
+        if (saved.notices !== undefined) content.notices = saved.notices;
+    }
     
     // Hall Specs
     if (content.halls) {
