@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>대관 신청 | GANGNAM X CUBE</title>
-    <meta name="description" content="GANGNAM X CUBE의 실시간 대관 현황을 확인하고 온라인으로 간편하게 신청하세요. Grand Hall, Reception Hall, Studio Hall 등 용도에 맞는 최적의 공간을 제안합니다.">
-    <meta property="og:title" content="대관 신청 | GANGNAM X CUBE">
-    <meta property="og:description" content="실시간 대관 현황 확인 및 온라인 신청">
+    <title>?�관 ?�청 | GANGNAM X CUBE</title>
+    <meta name="description" content="GANGNAM X CUBE???�시�??�관 ?�황???�인?�고 ?�라?�으�?간편?�게 ?�청?�세?? Grand Hall, Reception Hall, Studio Hall ???�도??맞는 최적??공간???�안?�니??">
+    <meta property="og:title" content="?�관 ?�청 | GANGNAM X CUBE">
+    <meta property="og:description" content="?�시�??�관 ?�황 ?�인 �??�라???�청">
     <meta property="og:image" content="main_grandhall.jpg">
     <link rel="stylesheet" href="style.css">
     <!-- Airbnb Style Flatpickr Theme -->
@@ -24,7 +24,7 @@
         .rental-container { max-width: 1200px; margin: 120px auto 80px; padding: 0 20px; }
         .section-title { font-family: 'Fraunces', serif; font-size: 2.5rem; text-align: center; margin-bottom: 50px; }
         
-        /* 1. 신청 기능 (Top Form) */
+        /* 1. ?�청 기능 (Top Form) */
         .top-inquiry-section { background: #fff; border: 1px solid #000; padding: 50px; margin-bottom: 100px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr 1fr; gap: 20px; align-items: flex-end; }
         .form-group { display: flex; flex-direction: column; gap: 10px; }
@@ -34,12 +34,12 @@
         .submit-btn-top { background: #000; color: #fff; padding: 18px; border: none; font-weight: 800; cursor: pointer; transition: opacity 0.3s; }
         .submit-btn-top:hover { opacity: 0.8; }
 
-        /* 2. 자료실 */
+        /* 2. ?�료??*/
         .resource-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 100px; }
         .resource-card { background: #fff; border: 1px solid #eee; padding: 30px; border-radius: 8px; transition: all 0.3s; cursor: pointer; text-align: center; }
         .resource-card:hover { border-color: #000; transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
 
-        /* 3. 공간 사진 */
+        /* 3. 공간 ?�진 */
         .hall-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 100px; }
         .hall-card { border: 1px solid #eee; border-radius: 8px; overflow: hidden; background: #fff; transition: transform 0.3s; }
         .hall-img-box { width: 100%; height: 250px; overflow: hidden; }
@@ -48,7 +48,7 @@
         .hall-card:hover img { transform: scale(1.05); }
         .hall-info { padding: 30px; text-align: center; }
 
-        /* 4. 캘린더 (Fixed Layout) */
+        /* 4. 캘린??(Fixed Layout) */
         .calendar-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 80px; }
         .inline-calendar-wrapper { 
             background: #fff; 
@@ -83,11 +83,11 @@
         </div>
         <nav class="main-nav">
             <ul>
-                <li><a href="index.html">공간 안내</a></li>
+                <li><a href="index.html">공간 ?�내</a></li>
                 <li><a href="3d_view.html">3D 공간 뷰어</a></li>
-                <li class="active"><a href="rental.html">대관 신청</a></li>
+                <li class="active"><a href="rental.html">?�관 ?�청</a></li>
                 <li><a href="contact.html">CONTACT</a></li>
-                <li><a href="notice.html">공지사항</a></li>
+                <li><a href="notice.html">공�??�항</a></li>
             </ul>
         </nav>
         <div class="header-right">
@@ -113,15 +113,15 @@
                 <div class="form-group">
                     <label>Event Category</label>
                     <select id="rental-category">
-                        <option value="Conference">컨퍼런스/세미나</option>
-                        <option value="Exhibition">전시/아트페어</option>
-                        <option value="Popup">브랜드 팝업</option>
-                        <option value="Shooting">촬영/스튜디오</option>
+                        <option value="Conference">컨퍼?�스/?��???/option>
+                        <option value="Exhibition">?�시/?�트?�어</option>
+                        <option value="Popup">브랜???�업</option>
+                        <option value="Shooting">촬영/?�튜?�오</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Rental Period</label>
-                    <input type="text" id="rental-period" placeholder="날짜를 선택하세요" readonly>
+                    <input type="text" id="rental-period" placeholder="?�짜�??�택?�세?? readonly>
                 </div>
                 <button class="submit-btn-top" id="btn-submit-rental">APPLY NOW</button>
             </div>
@@ -138,21 +138,21 @@
                 <div class="hall-img-box"><img id="hall-a-preview-img" src="main_grandhall.jpg"></div>
                 <div class="hall-info">
                     <h4 id="hall-a-card-title" style="margin-bottom: 10px;">Grand Hall (A)</h4>
-                    <p style="font-size: 0.8rem; color: #888;"><span id="hall-a-card-area">284㎡</span> | <span id="hall-a-card-cap">250명 수용</span> | 층고 <span id="hall-a-card-height">5.0m</span></p>
+                    <p style="font-size: 0.8rem; color: #888;"><span id="hall-a-card-area">284??/span> | <span id="hall-a-card-cap">250�??�용</span> | 층고 <span id="hall-a-card-height">5.0m</span></p>
                 </div>
             </div>
             <div class="hall-card">
                 <div class="hall-img-box"><img id="hall-b-preview-img" src="main_reception.jpg"></div>
                 <div class="hall-info">
                     <h4 id="hall-b-card-title" style="margin-bottom: 10px;">Reception Hall (B)</h4>
-                    <p style="font-size: 0.8rem; color: #888;"><span id="hall-b-card-area">205㎡</span> | <span id="hall-b-card-cap">100명 수용</span> | 층고 <span id="hall-b-card-height">3.5m</span></p>
+                    <p style="font-size: 0.8rem; color: #888;"><span id="hall-b-card-area">205??/span> | <span id="hall-b-card-cap">100�??�용</span> | 층고 <span id="hall-b-card-height">3.5m</span></p>
                 </div>
             </div>
             <div class="hall-card">
                 <div class="hall-img-box"><img id="hall-c-preview-img" src="main_studio.jpg"></div>
                 <div class="hall-info">
                     <h4 id="hall-c-card-title" style="margin-bottom: 10px;">Studio Hall (C)</h4>
-                    <p style="font-size: 0.8rem; color: #888;"><span id="hall-c-card-area">280㎡</span> | <span id="hall-c-card-cap">150명 수용</span> | 층고 <span id="hall-c-card-height">3.2m</span></p>
+                    <p style="font-size: 0.8rem; color: #888;"><span id="hall-c-card-area">280??/span> | <span id="hall-c-card-cap">150�??�용</span> | 층고 <span id="hall-c-card-height">3.2m</span></p>
                 </div>
             </div>
         </div>
@@ -209,7 +209,7 @@
                 var category = document.getElementById('rental-category').value;
                 var period = periodInput.value;
                 
-                if (!period) return alert('날짜를 선택해 주세요.');
+                if (!period) return alert('?�짜�??�택??주세??');
                 
                 localStorage.setItem('inquiryData', JSON.stringify({
                     halls: [hall],
@@ -225,15 +225,15 @@
             <div>
                 <h1 style="font-size: 1.5rem; margin-bottom: 20px;">GANGNAM<br>X CUBE</h1>
                 <p style="font-size: 0.8rem; color: #999;">© 2026 Boutique Monaco Museum. All rights reserved.</p>
-                <a href="privacy.html" style="font-size: 0.75rem; color: #bbb; text-decoration: underline; margin-top: 10px; display: inline-block;">개인정보처리방침</a>
+                <a href="privacy.html" style="font-size: 0.75rem; color: #bbb; text-decoration: underline; margin-top: 10px; display: inline-block;">개인?�보처리방침</a>
             </div>
             <div style="text-align: right; font-size: 0.85rem; line-height: 2;">
-                <p>서울시 서초구 서초대로 397 부띠크모나코 B1</p>
+                <p>?�울???�초�??�초?��?397 부?�크모나�?B1</p>
                 <p>T. 02.344.5042 | E. info@planningkorea.com</p>
-                <a href="admin/login.html" style="color: #000; text-decoration: underline;">관리자 로그인</a>
+                <a href="admin/login.html" style="color: #000; text-decoration: underline;">관리자 로그??/a>
             </div>
         </div>
     </footer>
-    <script type="module" src="main.js"></script>
+    <script type="module" src="main.js?v=70"></script>
 </body>
 </html>

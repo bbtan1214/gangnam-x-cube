@@ -12,7 +12,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>상세 정보 입력 | GANGNAM X CUBE</title>
+    <title>?�세 ?�보 ?�력 | GANGNAM X CUBE</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .inquiry-form-container { max-width: 700px; margin: 120px auto 80px; padding: 0 20px; }
@@ -54,53 +54,53 @@
             </div>
 
             <div id="selected-summary" class="selected-summary">
-                로딩 중...
+                로딩 �?..
             </div>
 
             <form id="final-inquiry-form">
                 <div class="input-row">
                     <div class="input-group">
-                        <label>성함 *</label>
+                        <label>?�함 *</label>
                         <input type="text" id="user-name" required>
                     </div>
                     <div class="input-group">
-                        <label>회사명/단체명 *</label>
+                        <label>?�사�??�체�?*</label>
                         <input type="text" id="user-company" required>
                     </div>
                 </div>
                 <div class="input-row">
                     <div class="input-group">
-                        <label>이메일 *</label>
+                        <label>?�메??*</label>
                         <input type="email" id="user-email" required>
                     </div>
                     <div class="input-group">
-                        <label>연락처 *</label>
+                        <label>?�락�?*</label>
                         <input type="tel" id="user-phone" required>
                     </div>
                 </div>
                 <div class="input-group">
-                    <label>행사 개요 및 추가 요청사항</label>
-                    <textarea id="user-memo" placeholder="행사 내용, 필요 장비, 주차 등 문의사항을 자유롭게 적어주세요."></textarea>
+                    <label>?�사 개요 �?추�? ?�청?�항</label>
+                    <textarea id="user-memo" placeholder="?�사 ?�용, ?�요 ?�비, 주차 ??문의?�항???�유�?�� ?�어주세??"></textarea>
                 </div>
                 <div class="input-group">
-                    <label>첨부파일 (행사 기획안 등)</label>
+                    <label>첨�??�일 (?�사 기획????</label>
                     <input type="file" id="user-file">
                 </div>
 
                 <div class="privacy-box">
-                    <strong>개인정보 수집 및 이용 안내</strong>
+                    <strong>개인?�보 ?�집 �??�용 ?�내</strong>
                     <ul>
-                        <li>수집 항목: 성함, 연락처, 이메일, 회사명/단체명</li>
-                        <li>수집 목적: 대관 문의 상담 및 예약 서비스 제공</li>
-                        <li>보유 기간: 상담 완료 후 1년 (계약 시 관련 법령에 의거 보관)</li>
+                        <li>?�집 ??��: ?�함, ?�락�? ?�메?? ?�사�??�체�?/li>
+                        <li>?�집 목적: ?�관 문의 ?�담 �??�약 ?�비???�공</li>
+                        <li>보유 기간: ?�담 ?�료 ??1??(계약 ??관??법령???�거 보�?)</li>
                     </ul>
                     <div class="consent-check">
                         <input type="checkbox" id="privacy-agree" required>
-                        <label for="privacy-agree">개인정보 수집 및 이용에 동의합니다. <a href="privacy.html" target="_blank" style="text-decoration: underline; color: #888; font-weight: 400; font-size: 0.75rem;">[약관보기]</a></label>
+                        <label for="privacy-agree">개인?�보 ?�집 �??�용???�의?�니?? <a href="privacy.html" target="_blank" style="text-decoration: underline; color: #888; font-weight: 400; font-size: 0.75rem;">[?��?보기]</a></label>
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn">대관 문의 신청하기</button>
+                <button type="submit" class="submit-btn">?�관 문의 ?�청?�기</button>
             </form>
         </div>
     </div>
@@ -109,22 +109,22 @@
         document.addEventListener('DOMContentLoaded', () => {
             const data = JSON.parse(localStorage.getItem('inquiryData'));
             if (!data) {
-                alert('잘못된 접근입니다.');
+                alert('?�못???�근?�니??');
                 location.href = 'rental.html';
                 return;
             }
 
             document.getElementById('selected-summary').innerHTML = `
-                <strong>선택한 공간:</strong> ${data.halls.join(', ')}<br>
-                <strong>행사 성격:</strong> ${data.category}<br>
-                <strong>희망 기간:</strong> ${data.period}
+                <strong>?�택??공간:</strong> ${data.halls.join(', ')}<br>
+                <strong>?�사 ?�격:</strong> ${data.category}<br>
+                <strong>?�망 기간:</strong> ${data.period}
             `;
 
             document.getElementById('final-inquiry-form').onsubmit = async (e) => {
                 e.preventDefault();
                 
                 if (!document.getElementById('privacy-agree').checked) {
-                    alert('개인정보 수집 및 이용에 동의해주세요.');
+                    alert('개인?�보 ?�집 �??�용???�의?�주?�요.');
                     return;
                 }
 
@@ -153,6 +153,6 @@
             };
         });
     </script>
-    <script type="module" src="main.js"></script>
+    <script type="module" src="main.js?v=70"></script>
 </body>
 </html>
