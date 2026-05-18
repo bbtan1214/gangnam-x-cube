@@ -1190,8 +1190,21 @@ window.initAdminSettingsAccounts = function() {
 
     if (!listBody) return;
 
+    // Ensure default admin account always exists
+    let accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+    if (accounts.length === 0 || !accounts.find(a => a.id === 'admin')) {
+        if (!accounts.find(a => a.id === 'admin')) {
+            accounts.unshift({ id: 'admin', name: '최고 관리자', pw: 'bmm2026!', role: 'Master', lastLogin: '-' });
+            localStorage.setItem('adminAccounts', JSON.stringify(accounts));
+        }
+    }
+
     const render = () => {
         const accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+        if (accounts.length === 0) {
+            listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#aaa;">등록된 계정이 없습니다.</td></tr>';
+            return;
+        }
         listBody.innerHTML = accounts.map((a, idx) => `
             <tr>
                 <td style="padding:12px;">
@@ -1208,38 +1221,43 @@ window.initAdminSettingsAccounts = function() {
         `).join('');
     };
 
-    showAddBtn.onclick = () => {
-        addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
-    };
+    if (showAddBtn) {
+        showAddBtn.onclick = () => {
+            addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
+        };
+    }
 
-    saveNewBtn.onclick = () => {
-        const id = document.getElementById('new-admin-id').value;
-        const name = document.getElementById('new-admin-name').value;
-        const phone = document.getElementById('new-admin-phone').value;
-        const pw = document.getElementById('new-admin-pw').value;
-        if (!id || !name || !pw) return alert('아이디, 이름, 비밀번호는 필수 입력 항목입니다.');
+    if (saveNewBtn) {
+        saveNewBtn.onclick = () => {
+            const id = document.getElementById('new-admin-id').value.trim();
+            const name = document.getElementById('new-admin-name').value.trim();
+            const phone = document.getElementById('new-admin-phone').value.trim();
+            const pw = document.getElementById('new-admin-pw').value;
+            if (!id || !name || !pw) return alert('아이디, 이름, 비밀번호는 필수 입력 항목입니다.');
 
-        const accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
-        if (accounts.find(a => a.id === id)) return alert('이미 존재하는 아이디입니다.');
+            const accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+            if (accounts.find(a => a.id === id)) return alert('이미 존재하는 아이디입니다.');
 
-        accounts.push({ id, name, phone, pw, role: 'Staff', lastLogin: '-' });
-        localStorage.setItem('adminAccounts', JSON.stringify(accounts));
-        
-        document.getElementById('new-admin-id').value = '';
-        document.getElementById('new-admin-name').value = '';
-        document.getElementById('new-admin-phone').value = '';
-        document.getElementById('new-admin-pw').value = '';
-        addForm.style.display = 'none';
-        render();
-    };
+            accounts.push({ id, name, phone, pw, role: 'Staff', lastLogin: '-' });
+            localStorage.setItem('adminAccounts', JSON.stringify(accounts));
+
+            document.getElementById('new-admin-id').value = '';
+            document.getElementById('new-admin-name').value = '';
+            document.getElementById('new-admin-phone').value = '';
+            document.getElementById('new-admin-pw').value = '';
+            addForm.style.display = 'none';
+            alert(`✅ 계정 "${id}"이(가) 생성되었습니다.`);
+            render();
+        };
+    }
 
     window.deleteAdminAccount = (idx) => {
-        if (confirm('해당 직원 계정을 삭제하시겠습니까?')) {
-            const accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
-            accounts.splice(idx, 1);
-            localStorage.setItem('adminAccounts', JSON.stringify(accounts));
-            render();
-        }
+        const accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+        if (!accounts[idx]) return;
+        if (!confirm(`계정 "${accounts[idx].id}"을(를) 삭제하시겠습니까?`)) return;
+        accounts.splice(idx, 1);
+        localStorage.setItem('adminAccounts', JSON.stringify(accounts));
+        render();
     };
 
     render();
