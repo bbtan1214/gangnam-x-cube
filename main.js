@@ -1400,6 +1400,7 @@ window.initAdminNotices = function() {
         addBtn.dataset.bound = 'true';
         addBtn.onclick = () => {
             const title = document.getElementById('new-notice-title').value.trim();
+            const contentText = document.getElementById('new-notice-content') ? document.getElementById('new-notice-content').value.trim() : '';
             let date = document.getElementById('new-notice-date').value;
             if (!title) { alert('제목을 입력하세요.'); return; }
             if (!date) {
@@ -1411,11 +1412,12 @@ window.initAdminNotices = function() {
             
             const curContent = JSON.parse(localStorage.getItem('siteContent_v3')) || DEFAULT_CONTENT;
             if (!curContent.notices) curContent.notices = [];
-            curContent.notices.unshift({ date, title });
+            curContent.notices.unshift({ date, title, content: contentText });
             localStorage.setItem('siteContent_v3', JSON.stringify(curContent));
             
             document.getElementById('new-notice-title').value = '';
             document.getElementById('new-notice-date').value = '';
+            if(document.getElementById('new-notice-content')) document.getElementById('new-notice-content').value = '';
             window.initAdminNotices();
         };
     }
@@ -1739,22 +1741,22 @@ function renderNotices() {
     const container = document.getElementById('public-notice-list');
     if (!container) return;
     const saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
-    const content = { ...DEFAULT_CONTENT, ...saved };
-    const notices = (content.notices && content.notices.length > 0) ? content.notices : DEFAULT_CONTENT.notices;
+    // Fallback to DEFAULT_CONTENT only if 'notices' is explicitly undefined in saved content.
+    const notices = saved.notices !== undefined ? saved.notices : DEFAULT_CONTENT.notices;
     
-    container.innerHTML = notices.length ? notices.map(n => `
+    container.innerHTML = notices && notices.length > 0 ? notices.map(n => `
         <div class="notice-entry">
             <div class="notice-header-bar" onclick="this.parentElement.classList.toggle('active')">
-                <div class="notice-date">${n.date}</div>
+                <div class="notice-date">${n.date || ''}</div>
                 <div class="notice-title-box">
                     ${n.urgent ? '<span class="urgent-tag">중요</span>' : ''}
-                    <h3 class="notice-title">${n.title}</h3>
+                    <h3 class="notice-title">${n.title || ''}</h3>
                 </div>
                 <div class="notice-chevron"></div>
             </div>
             <div class="notice-body">
                 <div class="notice-content-inner">
-                    <p>${n.content.replace(/\n/g, '<br>')}</p>
+                    <p>${(n.content || '').replace(/\n/g, '<br>')}</p>
                 </div>
             </div>
         </div>
