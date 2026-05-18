@@ -904,6 +904,150 @@ function initEstimateManager() {
         }
         return '일금 ' + result + '원정';
     }
+
+    // === Estimate Save/Load System ===
+    const savedBody = document.getElementById('saved-estimates-body');
+    let editingEstimateId = null; // Track if we're editing an existing estimate
+
+    function getEstimates() {
+        return JSON.parse(localStorage.getItem('savedEstimates') || '[]');
+    }
+
+    function saveEstimates(estimates) {
+        localStorage.setItem('savedEstimates', JSON.stringify(estimates));
+    }
+
+    function generateEstimateNumber() {
+        const estimates = getEstimates();
+        const today = new Date();
+        const prefix = `EST-${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}`;
+        const existing = estimates.filter(e => e.number && e.number.startsWith(prefix));
+        const nextSeq = existing.length > 0 ? Math.max(...existing.map(e => parseInt(e.number.split('-').pop()) || 0)) + 1 : 1;
+        return `${prefix}-${String(nextSeq).padStart(3,'0')}`;
+    }
+
+    function collectCurrentEstimateData() {
+        const receiver = document.getElementById('est-input-receiver').value.trim();
+        const date = document.getElementById('est-input-date').value;
+        const items = [];
+        editBody.querySelectorAll('tr').forEach(row => {
+            items.push({
+                name: row.querySelector('.est-item-name').value,
+                qty: parseInt(row.querySelector('.est-item-qty').value) || 0,
+                unit: row.querySelector('.est-item-unit').value,
+                price: parseInt(row.querySelector('.est-item-price').value) || 0
+            });
+        });
+        const subtotal = items.reduce((sum, i) => sum + (i.qty * i.price), 0);
+        return { receiver, date, items, subtotal, tax: Math.floor(subtotal * 0.1), total: subtotal + Math.floor(subtotal * 0.1) };
+    }
+
+    // Save Button
+    const saveBtn = document.getElementById('btn-est-save');
+    if (saveBtn) {
+        saveBtn.onclick = () => {
+            const data = collectCurrentEstimateData();
+            if (!data.receiver) { alert('수신자를 입력하세요.'); return; }
+            if (data.items.length === 0) { alert('항목을 추가하세요.'); return; }
+
+            const estimates = getEstimates();
+
+            if (editingEstimateId) {
+                // Update existing estimate
+                const idx = estimates.findIndex(e => e.id === editingEstimateId);
+                if (idx !== -1) {
+                    estimates[idx] = { ...estimates[idx], ...data, updatedAt: new Date().toISOString() };
+                    saveEstimates(estimates);
+                    alert(`견적서 ${estimates[idx].number} 수정 완료!`);
+                }
+                editingEstimateId = null;
+                saveBtn.innerText = '💾 견적서 저장';
+            } else {
+                // Create new estimate
+                const newEst = {
+                    id: 'est_' + Date.now(),
+                    number: generateEstimateNumber(),
+                    ...data,
+                    createdAt: new Date().toISOString()
+                };
+                estimates.unshift(newEst);
+                saveEstimates(estimates);
+                alert(`견적서 ${newEst.number} 저장 완료!`);
+            }
+
+            renderSavedEstimates();
+        };
+    }
+
+    // Render Saved Estimates List
+    function renderSavedEstimates() {
+        if (!savedBody) return;
+        const estimates = getEstimates();
+        savedBody.innerHTML = estimates.length > 0 ? estimates.map(est => `
+            <tr>
+                <td><strong>${est.number || '-'}</strong></td>
+                <td>${est.receiver || '-'}</td>
+                <td>${est.date || '-'}</td>
+                <td style="text-align:right; font-weight:600;">￦${(est.total || 0).toLocaleString()}</td>
+                <td>
+                    <div style="display:flex; gap:5px;">
+                        <button onclick="window.loadEstimate('${est.id}')" style="background:#333; color:#fff; border:none; padding:5px 12px; border-radius:3px; cursor:pointer; font-size:0.75rem;">수정</button>
+                        <button onclick="window.previewSavedEstimate('${est.id}')" style="background:#666; color:#fff; border:none; padding:5px 12px; border-radius:3px; cursor:pointer; font-size:0.75rem;">미리보기</button>
+                        <button onclick="window.deleteEstimate('${est.id}')" style="background:#ff4444; color:#fff; border:none; padding:5px 12px; border-radius:3px; cursor:pointer; font-size:0.75rem;">삭제</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('') : '<tr><td colspan="5" class="empty-state" style="text-align:center; padding:30px; color:#aaa;">저장된 견적서가 없습니다.</td></tr>';
+    }
+
+    // Load estimate into editor for editing
+    window.loadEstimate = (id) => {
+        const estimates = getEstimates();
+        const est = estimates.find(e => e.id === id);
+        if (!est) return;
+
+        document.getElementById('est-input-receiver').value = est.receiver || '';
+        document.getElementById('est-input-date').value = est.date || '';
+
+        editBody.innerHTML = '';
+        (est.items || []).forEach(item => {
+            addEstimateRow(item.name, item.qty, item.unit, item.price);
+        });
+        updateEstimateTotal();
+
+        editingEstimateId = id;
+        if (saveBtn) saveBtn.innerText = `📝 ${est.number} 수정 저장`;
+        alert(`${est.number} 견적서를 불러왔습니다. 수정 후 [수정 저장] 버튼을 눌러주세요.`);
+    };
+
+    // Preview saved estimate
+    window.previewSavedEstimate = (id) => {
+        const estimates = getEstimates();
+        const est = estimates.find(e => e.id === id);
+        if (!est) return;
+
+        // Load into form then trigger preview
+        document.getElementById('est-input-receiver').value = est.receiver || '';
+        document.getElementById('est-input-date').value = est.date || '';
+        editBody.innerHTML = '';
+        (est.items || []).forEach(item => addEstimateRow(item.name, item.qty, item.unit, item.price));
+        updateEstimateTotal();
+
+        document.getElementById('btn-est-preview').click();
+    };
+
+    // Delete estimate
+    window.deleteEstimate = (id) => {
+        const estimates = getEstimates();
+        const est = estimates.find(e => e.id === id);
+        if (!est) return;
+        if (!confirm(`견적서 ${est.number}을(를) 삭제하시겠습니까?`)) return;
+        const filtered = estimates.filter(e => e.id !== id);
+        saveEstimates(filtered);
+        renderSavedEstimates();
+    };
+
+    renderSavedEstimates();
 }
 
 window.initAdminStats = function() {

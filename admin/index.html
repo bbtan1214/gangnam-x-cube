@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -318,8 +318,30 @@
                     
                     <div style="display:flex; justify-content:space-between;">
                         <button id="btn-est-add-row" class="save-btn" style="background:#eee; color:#333; padding:10px 20px; border:none; border-radius:4px; cursor:pointer;">+ 항목 추가</button>
-                        <button id="btn-est-preview" class="save-btn" style="background:#000; color:#fff; padding:10px 30px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">견적서 미리보기 및 저장</button>
+                        <div style="display:flex; gap:10px;">
+                            <button id="btn-est-save" class="save-btn" style="background:#2196F3; color:#fff; padding:10px 25px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">💾 견적서 저장</button>
+                            <button id="btn-est-preview" class="save-btn" style="background:#000; color:#fff; padding:10px 30px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">견적서 미리보기</button>
+                        </div>
                     </div>
+                </div>
+
+                <!-- Saved Estimates List -->
+                <div class="cms-card" style="margin-top:20px;">
+                    <h4 style="margin-top:0;">저장된 견적서 목록</h4>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>견적번호</th>
+                                <th>수신자</th>
+                                <th>견적일자</th>
+                                <th>합계금액</th>
+                                <th style="width:160px;">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="saved-estimates-body">
+                            <tr><td colspan="5" class="empty-state" style="text-align:center; padding:30px; color:#aaa;">저장된 견적서가 없습니다.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
