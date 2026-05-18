@@ -360,6 +360,19 @@ async function loadSiteContent() {
         }
     }
 
+    // Render Resources for Rental Page
+    const resList = document.getElementById('rental-resource-list');
+    if (resList) {
+        const resources = content.resources || DEFAULT_CONTENT.resources;
+        resList.innerHTML = resources.map(r => `
+            <div class="resource-card" onclick="window.open('${r.url}')">
+                <div style="font-size: 2.5rem; margin-bottom: 15px;">${r.icon || '📄'}</div>
+                <h4 style="margin-bottom: 10px; font-size: 0.95rem;">${r.title}</h4>
+                <p style="font-size: 0.75rem; color: #888;">${r.desc}</p>
+            </div>
+        `).join('');
+    }
+
     // Site Info (Home Page)
     const si = content.siteInfo || DEFAULT_CONTENT.siteInfo;
     const siEls = {
@@ -1207,12 +1220,12 @@ window.initCMS = function() {
             try {
                 saveBtn.disabled = true;
                 saveBtn.innerText = "저장 중...";
-                await setDoc(doc(db, "settings", "siteContent_v3"), newContent);
                 localStorage.setItem('siteContent_v3', JSON.stringify(newContent));
+                await setDoc(doc(db, "settings", "siteContent_v3"), newContent);
                 alert('☁️ 구글 클라우드 DB에 성공적으로 저장되었습니다!');
             } catch (e) {
                 console.error("Save Error:", e);
-                alert('❌ 저장 실패: ' + e.message);
+                alert('☁️ 클라우드 저장 실패로 로컬에만 임시 저장되었습니다.');
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.innerText = "변경사항 최종 저장하기";

@@ -128,55 +128,31 @@
         </div>
 
         <div class="section-title" style="font-size: 2rem;">Downloads</div>
-        <div class="resource-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-            <div class="resource-card" onclick="window.open(encodeURI('대관자료 모음/대관 안내문 (BMM-SRG-202605-01).pdf'))">
-                <div style="font-size: 2.5rem; margin-bottom: 15px;">📄</div>
-                <h4 style="margin-bottom: 10px; font-size: 0.95rem;">대관 안내문</h4>
-                <p style="font-size: 0.75rem; color: #888;">BMM-SRG-202605-01</p>
-            </div>
-            <div class="resource-card" onclick="window.open(encodeURI('대관자료 모음/대관공간 상세 도면자료 (BMM-DR-202605-01).pdf'))">
-                <div style="font-size: 2.5rem; margin-bottom: 15px;">📐</div>
-                <h4 style="margin-bottom: 10px; font-size: 0.95rem;">상세 도면자료</h4>
-                <p style="font-size: 0.75rem; color: #888;">BMM-DR-202605-01</p>
-            </div>
-            <div class="resource-card" onclick="window.open(encodeURI('대관자료 모음/대관시설 사용 안내 (BMM-UG-202605-01).pdf'))">
-                <div style="font-size: 2.5rem; margin-bottom: 15px;">🛠️</div>
-                <h4 style="margin-bottom: 10px; font-size: 0.95rem;">시설 사용 안내</h4>
-                <p style="font-size: 0.75rem; color: #888;">BMM-UG-202605-01</p>
-            </div>
-            <div class="resource-card" onclick="window.open(encodeURI('대관자료 모음/보유시설 및 장비 리스트 (BMM-EL-202605-01).pdf'))">
-                <div style="font-size: 2.5rem; margin-bottom: 15px;">📋</div>
-                <h4 style="margin-bottom: 10px; font-size: 0.95rem;">장비 리스트</h4>
-                <p style="font-size: 0.75rem; color: #888;">BMM-EL-202605-01</p>
-            </div>
-            <div class="resource-card" onclick="window.open(encodeURI('대관자료 모음/주차 이용 안내문 (BMM-PG-202605-01).pdf'))">
-                <div style="font-size: 2.5rem; margin-bottom: 15px;">🅿️</div>
-                <h4 style="margin-bottom: 10px; font-size: 0.95rem;">주차 이용 안내</h4>
-                <p style="font-size: 0.75rem; color: #888;">BMM-PG-202605-01</p>
-            </div>
+        <div class="resource-grid" id="rental-resource-list" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <!-- Resources will be dynamically loaded here by main.js -->
         </div>
 
         <div class="section-title" style="font-size: 2rem;">Space Gallery</div>
         <div class="hall-selection-grid">
             <div class="hall-card">
-                <div class="hall-img-box"><img src="main_grandhall.jpg"></div>
+                <div class="hall-img-box"><img id="hall-a-preview-img" src="main_grandhall.jpg"></div>
                 <div class="hall-info">
-                    <h4 style="margin-bottom: 10px;">Grand Hall (A)</h4>
-                    <p style="font-size: 0.8rem; color: #888;">284㎡ | 250명 수용 | 층고 5.0m</p>
+                    <h4 id="hall-a-card-title" style="margin-bottom: 10px;">Grand Hall (A)</h4>
+                    <p style="font-size: 0.8rem; color: #888;"><span id="hall-a-card-area">284㎡</span> | <span id="hall-a-card-cap">250명 수용</span> | 층고 <span id="hall-a-card-height">5.0m</span></p>
                 </div>
             </div>
             <div class="hall-card">
-                <div class="hall-img-box"><img src="main_reception.jpg"></div>
+                <div class="hall-img-box"><img id="hall-b-preview-img" src="main_reception.jpg"></div>
                 <div class="hall-info">
-                    <h4 style="margin-bottom: 10px;">Reception Hall (B)</h4>
-                    <p style="font-size: 0.8rem; color: #888;">205㎡ | 100명 수용 | 층고 3.5m</p>
+                    <h4 id="hall-b-card-title" style="margin-bottom: 10px;">Reception Hall (B)</h4>
+                    <p style="font-size: 0.8rem; color: #888;"><span id="hall-b-card-area">205㎡</span> | <span id="hall-b-card-cap">100명 수용</span> | 층고 <span id="hall-b-card-height">3.5m</span></p>
                 </div>
             </div>
             <div class="hall-card">
-                <div class="hall-img-box"><img src="main_studio.jpg"></div>
+                <div class="hall-img-box"><img id="hall-c-preview-img" src="main_studio.jpg"></div>
                 <div class="hall-info">
-                    <h4 style="margin-bottom: 10px;">Studio Hall (C)</h4>
-                    <p style="font-size: 0.8rem; color: #888;">280㎡ | 150명 수용 | 층고 3.2m</p>
+                    <h4 id="hall-c-card-title" style="margin-bottom: 10px;">Studio Hall (C)</h4>
+                    <p style="font-size: 0.8rem; color: #888;"><span id="hall-c-card-area">280㎡</span> | <span id="hall-c-card-cap">150명 수용</span> | 층고 <span id="hall-c-card-height">3.2m</span></p>
                 </div>
             </div>
         </div>
