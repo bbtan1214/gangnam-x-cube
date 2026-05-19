@@ -421,11 +421,11 @@ async function loadSiteContent() {
 }
 
 // App Initialization
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log("🚀 BMM System Restored");
     
     try {
-        loadSiteContent();
+        await loadSiteContent();
     } catch(e) { console.error("Content load failed", e); }
     
     if (document.getElementById('canvas-container')) {
