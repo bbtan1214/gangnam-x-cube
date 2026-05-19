@@ -1297,6 +1297,7 @@ window.initCMS = function() {
     if (document.getElementById('cms-contact-phone')) document.getElementById('cms-contact-phone').value = c.phone;
     if (document.getElementById('cms-contact-email')) document.getElementById('cms-contact-email').value = c.email;
     if (document.getElementById('cms-contact-partnership')) document.getElementById('cms-contact-partnership').value = c.partnership;
+    if (document.getElementById('cms-contact-instagram')) document.getElementById('cms-contact-instagram').value = c.instagram || '';
     if (document.getElementById('cms-contact-hours')) document.getElementById('cms-contact-hours').value = c.hours;
 
     if (document.getElementById('cms-gallery-urls')) {
@@ -1372,6 +1373,7 @@ window.initCMS = function() {
                 phone: document.getElementById('cms-contact-phone').value,
                 email: document.getElementById('cms-contact-email').value,
                 partnership: document.getElementById('cms-contact-partnership').value,
+                instagram: document.getElementById('cms-contact-instagram') ? document.getElementById('cms-contact-instagram').value : '',
                 hours: document.getElementById('cms-contact-hours').value
             };
 
@@ -2060,6 +2062,7 @@ function renderContactInfo() {
         'contact-phone': c.phone,
         'contact-email': c.email,
         'contact-partnership': c.partnership,
+        'contact-instagram': c.instagram || '',
         'contact-hours': c.hours
     };
     for (const id in els) {
@@ -2067,6 +2070,14 @@ function renderContactInfo() {
         if (el) {
             if (id === 'contact-hours') {
                 el.innerHTML = els[id].replace(/\n/g, '<br>');
+            } else if (id === 'contact-instagram') {
+                el.href = els[id] || '#';
+                if (els[id]) {
+                    el.innerText = els[id].replace(/^https?:\/\/(www\.)?instagram\.com\//, '@').replace(/\/$/, '');
+                    el.style.display = 'inline';
+                } else {
+                    el.style.display = 'none';
+                }
             } else {
                 el.innerText = els[id];
             }
