@@ -22,18 +22,9 @@ const upload = multer({
     }
 });
 
-// CORS
-const allowedOrigins = [
-    'https://gangnamxcube.com',
-    'https://bbtan1214.github.io',
-    'http://localhost',
-    'http://127.0.0.1'
-];
+// CORS - 모든 출처 허용 (관리자 접근용)
 app.use(cors({
-    origin: (origin, cb) => {
-        if (!origin || allowedOrigins.some(o => origin.startsWith(o))) cb(null, true);
-        else cb(new Error('CORS 차단: ' + origin));
-    },
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
