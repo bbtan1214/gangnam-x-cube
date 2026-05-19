@@ -1633,11 +1633,9 @@ window.simulateHallUpload = (hallId, input) => {
     }
     
     window.processImageUpload(file, (key) => {
-        const textarea = document.getElementById(`cms-hall-${hallId}-gallery`);
-        if (textarea) {
-            const currentVal = textarea.value.trim();
-            const newVal = currentVal ? currentVal + '\n' + key : key;
-            textarea.value = newVal;
+        const inputField = document.getElementById(`cms-hall-${hallId}-img`);
+        if (inputField) {
+            inputField.value = key;
             
             if (msg) {
                 msg.querySelector('div').innerText = `[${hallId.toUpperCase()}] 이미지 추가됨. '저장' 버튼을 눌러 확정하세요.`;
