@@ -4,16 +4,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import gsap from 'gsap';
 
-// --- GOOGLE CLOUD DB (FIRESTORE) INITIALIZATION ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { 
-    getFirestore, doc, getDoc, setDoc, collection, addDoc, 
-    query, orderBy, onSnapshot, updateDoc, deleteDoc, serverTimestamp 
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { firebaseConfig } from "./firebaseConfig.js";
+// ─── GOOGLE CLOUD RUN API ───────────────────────────────────────
+// Cloud Run 배포 후 아래 URL을 실제 서비스 URL로 교체하세요
+// 예: https://gxcube-api-xxxxxxxx-an.a.run.app
+const API_URL = window.GX_API_URL || 'https://gxcube-api-327271214021.asia-northeast3.run.app';
+// ────────────────────────────────────────────────────────────────
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 console.log("🛠️ GANGNAM X CUBE System Loading... v1.50 (Cloud Powered)");
 window.addEventListener('error', (e) => {
@@ -294,30 +290,29 @@ window.resolveImageUrl = (url) => {
             return localImages[url] || 'https://placehold.co/600x400?text=Image+Not+Found';
         } catch(e) { return url; }
     }
+    // Admin 페이지(/admin/ 하위)에서 상대경로 이미지는 '../'를 붙여 루트 참조
+    const isAdminPage = window.location.pathname.includes('/admin/');
+    const isRelativePath = !url.startsWith('http') && !url.startsWith('data:') && !url.startsWith('/') && !url.startsWith('../');
+    if (isAdminPage && isRelativePath) {
+        return '../' + url;
+    }
     return url;
 };
 
 async function loadSiteContent() {
-    // Always use localStorage as the primary source (admin saves here first)
-    let saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
-    console.log("💾 LocalStorage Data Loaded:", Object.keys(saved).length > 0 ? 'Found' : 'Empty');
-
-    // Try Firestore as secondary/backup source
+    // Firestore REST API 로드 (Cloud Run 경유)
+    let saved = {};
     try {
-        const docRef = doc(db, "settings", "siteContent_v3");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            const cloudData = docSnap.data();
-            console.log("📡 Cloud Data Available");
-            // Only use cloud data if localStorage is empty (fresh browser)
-            if (Object.keys(saved).length === 0) {
-                saved = cloudData;
-                localStorage.setItem('siteContent_v3', JSON.stringify(saved));
-                console.log("📡 Using Cloud Data (localStorage was empty)");
-            }
+        const res = await fetch(`${API_URL}/content`);
+        if (res.ok) {
+            saved = await res.json();
+            // 캐시: localStorage 동기화
+            localStorage.setItem('siteContent_v3', JSON.stringify(saved));
+            console.log('📡 Cloud 콘텐츠 로드 완료');
         }
     } catch (e) {
-        console.warn("⚠️ Firestore unavailable, using local data only:", e.message);
+        console.warn('⚠️ Cloud 연결 실패, localStorage 사용:', e.message);
+        saved = JSON.parse(localStorage.getItem('siteContent_v3') || '{}');
     }
     const hasSavedData = Object.keys(saved).length > 0;
     const content = hasSavedData ? { ...DEFAULT_CONTENT, ...saved } : { ...DEFAULT_CONTENT };
@@ -729,34 +724,23 @@ window.renderInquiryList = function() {
             </tr>
         `).join('') : '<tr><td colspan="8" class="empty-state" style="text-align:center; padding:30px;">내역이 없습니다.</td></tr>';
 
-        // Update Stats on Dashboard
         const total = document.getElementById('stat-total-inquires');
         if (total) total.innerText = list.length;
         const pendingCount = document.getElementById('stat-pending-inquires');
         if (pendingCount) pendingCount.innerText = list.filter(i => i.status !== 'confirmed').length;
         const confirmedCount = document.getElementById('stat-confirmed-inquires');
         if (confirmedCount) confirmedCount.innerText = list.filter(i => i.status === 'confirmed').length;
-        
-        // Expose list globally for modal access
         window.currentInquiryList = list;
     };
 
-    try {
-        const q = query(collection(db, "inquiries"), orderBy("createdAt", "desc"));
-        onSnapshot(q, (snapshot) => {
-            const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderData(list);
-        }, (error) => {
-            console.error("Firestore onSnapshot error:", error);
-            // Fallback to localStorage if Firebase permissions fail
-            const localList = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-            renderData(localList);
+    // Cloud Run REST API로 문의 목록 조회
+    fetch(`${API_URL}/inquiries`)
+        .then(r => r.json())
+        .then(list => renderData(list))
+        .catch(err => {
+            console.warn('Cloud 조회 실패, localStorage 사용:', err.message);
+            renderData(JSON.parse(localStorage.getItem('inquiryList') || '[]'));
         });
-    } catch(err) {
-        console.error("Firestore init error:", err);
-        const localList = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-        renderData(localList);
-    }
 }
 
 
@@ -1408,13 +1392,18 @@ window.initCMS = function() {
 
             try {
                 saveBtn.disabled = true;
-                saveBtn.innerText = "저장 중...";
+                saveBtn.innerText = '저장 중...';
                 localStorage.setItem('siteContent_v3', JSON.stringify(newContent));
-                await setDoc(doc(db, "settings", "siteContent_v3"), newContent);
-                alert('☁️ 구글 클라우드 DB에 성공적으로 저장되었습니다!');
+                const res = await fetch(`${API_URL}/content`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newContent)
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                alert('☁️ Google Cloud에 성공적으로 저장되었습니다!');
             } catch (e) {
-                console.error("Save Error:", e);
-                alert('☁️ 클라우드 저장 실패로 로컬에만 임시 저장되었습니다.');
+                console.error('Save Error:', e);
+                alert('☁️ 클라우드 저장 실패, 로컬에만 임시 저장되었습니다.\n' + e.message);
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.innerText = "변경사항 최종 저장하기";
@@ -1582,42 +1571,52 @@ window.processResourceUpload = (input) => {
     reader.readAsDataURL(file);
 };
 
-window.processImageUpload = (file, callback) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 1200;
-            const MAX_HEIGHT = 1200;
-            let width = img.width;
-            let height = img.height;
+// Firebase Storage 이미지 업로드 → Cloud Run → Google Cloud Storage
+window.processImageUpload = async (file, callback) => {
+    const msg = document.getElementById('msg-box');
+    try {
+        if (msg) { msg.style.background = ''; msg.style.color = ''; msg.querySelector('div').innerText = '☁️ Google Cloud에 업로드 중...'; msg.style.display = 'block'; }
 
-            if (width > height) {
-                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-            } else {
-                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-            }
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            let localImages = JSON.parse(localStorage.getItem('bmm_local_images') || '{}');
-            const key = 'local_' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.-]/g, '');
-            
-            try {
-                localImages[key] = dataUrl;
-                localStorage.setItem('bmm_local_images', JSON.stringify(localImages));
-                callback(key);
-            } catch (err) {
-                alert('저장 공간이 부족합니다(LocalStorage Quota 초과). 로컬에서는 최대 5MB 정도만 임시 보관이 가능합니다.');
-            }
-        };
-        img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+        // 클라이언트에서 리사이징 후 서버로 전송
+        const resizedBlob = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = reject;
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onerror = reject;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX = 1200;
+                    let w = img.width, h = img.height;
+                    if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
+                    else { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('이미지 변환 실패')), 'image/jpeg', 0.85);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        const formData = new FormData();
+        const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        formData.append('image', resizedBlob, safeFileName);
+
+        const res = await fetch(`${API_URL}/upload`, { method: 'POST', body: formData });
+        if (!res.ok) throw new Error(`서버 응답 오류: HTTP ${res.status}`);
+        const { url } = await res.json();
+
+        if (msg) { msg.querySelector('div').innerText = '✅ Google Cloud Storage 업로드 완료! [저장] 버튼으로 확정하세요.'; setTimeout(() => { msg.style.display = 'none'; }, 5000); }
+        callback(url);
+
+    } catch (err) {
+        console.error('GCS 업로드 실패:', err);
+        if (msg) {
+            msg.querySelector('div').innerHTML = `❌ <strong>업로드 실패</strong><br><small>${err.message}</small>`;
+            msg.style.display = 'block';
+        }
+    }
 };
 
 /**
@@ -1834,32 +1833,26 @@ window.deleteProposal = (idx) => {
  * Inquiry Submission Logic (Global)
  */
 window.submitInquiryToFirestore = async function(inquiryData) {
-    // Always save to localStorage first (reliable local backup)
+    // localStorage 백업
     const localList = JSON.parse(localStorage.getItem('inquiryList') || '[]');
-    const localEntry = {
-        ...inquiryData,
-        id: 'local_' + Date.now(),
-        createdAt: new Date().toISOString(),
-        status: 'pending'
-    };
+    const localEntry = { ...inquiryData, id: 'local_' + Date.now(), createdAt: new Date().toISOString(), status: 'pending' };
     localList.unshift(localEntry);
     localStorage.setItem('inquiryList', JSON.stringify(localList));
-    window.currentInquiryList = localList;
-    console.log("💾 Inquiry saved to localStorage");
 
-    // Also try Firestore
+    // Cloud Run REST API로 제출
     try {
-        console.log("📤 Submitting to Cloud:", inquiryData);
-        const docRef = await addDoc(collection(db, "inquiries"), {
-            ...inquiryData,
-            createdAt: serverTimestamp(),
-            status: 'pending'
+        const res = await fetch(`${API_URL}/inquiries`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...inquiryData, status: 'pending' })
         });
-        console.log("✅ Cloud Submission Success. ID:", docRef.id);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { id } = await res.json();
+        console.log('✅ 문의 Cloud 저장 완료. ID:', id);
         return true;
     } catch (e) {
-        console.warn("⚠️ Cloud submission failed, but saved locally:", e.message);
-        return true; // Still return true because localStorage save succeeded
+        console.warn('⚠️ Cloud 저장 실패, 로컬 백업만 저장됨:', e.message);
+        return true;
     }
 };
 
@@ -1992,27 +1985,32 @@ window.confirmInquiry = async function(id) {
     if (!id) return;
     try {
         const manager = document.getElementById('inq-manager').value;
-        await updateDoc(doc(db, "inquiries", id), {
-            status: 'confirmed',
-            manager: manager
+        const res = await fetch(`${API_URL}/inquiries/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'confirmed', manager })
         });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         window.closeInquiryDetail();
-        alert(`☁️ 클라우드 DB 업데이트 완료: 예약이 확정되었습니다.`);
+        window.renderInquiryList();
+        alert('☁️ 예약이 확정되었습니다.');
     } catch (e) {
-        console.error("Confirm Error:", e);
-        alert("업데이트 실패: " + e.message);
+        console.error('Confirm Error:', e);
+        alert('업데이트 실패: ' + e.message);
     }
 };
 
 window.deleteInquiry = async function(id) {
-    if (confirm('해당 대관 문의 내역을 정말 삭제하시겠습니까? (클라우드 DB에서 영구 삭제됩니다)')) {
+    if (confirm('해당 대관 문의 내역을 정말 삭제하시겠습니까? (Google Cloud에서 영구 삭제됩니다)')) {
         try {
-            await deleteDoc(doc(db, "inquiries", id));
+            const res = await fetch(`${API_URL}/inquiries/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             window.closeInquiryDetail();
-            alert("🗑️ 삭제 완료");
+            window.renderInquiryList();
+            alert('🗑️ 삭제 완료');
         } catch (e) {
-            console.error("Delete Error:", e);
-            alert("삭제 실패: " + e.message);
+            console.error('Delete Error:', e);
+            alert('삭제 실패: ' + e.message);
         }
     }
 };
