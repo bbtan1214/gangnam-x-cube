@@ -1267,8 +1267,20 @@ window.initAdminSettingsAccounts = function() {
 /**
  * CMS Logic: Content Management
  */
-window.initCMS = function() {
-    const saved = JSON.parse(localStorage.getItem('siteContent_v3')) || {};
+window.initCMS = async function() {
+    // Always fetch latest from cloud to avoid stale data overwriting saved values
+    let saved = {};
+    try {
+        const res = await fetch(`${API_URL}/content`);
+        if (res.ok) {
+            saved = await res.json();
+            localStorage.setItem('siteContent_v3', JSON.stringify(saved));
+        } else {
+            saved = JSON.parse(localStorage.getItem('siteContent_v3') || '{}');
+        }
+    } catch(e) {
+        saved = JSON.parse(localStorage.getItem('siteContent_v3') || '{}');
+    }
     const content = { ...window.DEFAULT_CONTENT, ...saved };
     
     // Deep merge for nested fields
