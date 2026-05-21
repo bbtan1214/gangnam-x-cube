@@ -368,13 +368,34 @@ async function loadSiteContent() {
     const resList = document.getElementById('rental-resource-list');
     if (resList) {
         const resources = content.resources || DEFAULT_CONTENT.resources;
-        resList.innerHTML = resources.map(r => `
-            <div class="resource-card" onclick="window.open('${r.url}')">
+        resList.innerHTML = resources.map((r, index) => `
+            <div class="resource-card" data-index="${index}" style="cursor: pointer;">
                 <div style="font-size: 2.5rem; margin-bottom: 15px;">${r.icon || '📄'}</div>
                 <h4 style="margin-bottom: 10px; font-size: 0.95rem;">${r.title}</h4>
                 <p style="font-size: 0.75rem; color: #888;">${r.desc}</p>
             </div>
         `).join('');
+
+        // 안전한 클릭 리스너 바인딩 (LocalStorage 및 GCS URL/로컬 파일 대응)
+        resList.querySelectorAll('.resource-card').forEach(card => {
+            card.onclick = () => {
+                const idx = card.getAttribute('data-index');
+                const r = resources[idx];
+                if (!r || !r.url) return;
+                
+                const resolvedUrl = window.resolveImageUrl(r.url);
+                if (resolvedUrl.startsWith('data:')) {
+                    const link = document.createElement('a');
+                    link.href = resolvedUrl;
+                    link.download = r.title || 'download';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    window.open(resolvedUrl, '_blank');
+                }
+            };
+        });
     }
 
     // Site Info (Home Page)
@@ -1549,40 +1570,46 @@ window.initCMS = async function() {
     renderHeroPreview();
 }
 
-window.processResourceUpload = (input) => {
+window.processResourceUpload = async (input) => {
     const file = input.files[0];
     if (!file) return;
 
     const msg = document.getElementById('msg-box');
     if (msg) {
-        msg.querySelector('div').innerText = `자료 업로드 중...`;
+        msg.style.background = '';
+        msg.style.color = '';
+        msg.querySelector('div').innerText = `☁️ Google Cloud에 자료 업로드 중...`;
         msg.style.display = 'block';
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const dataUrl = e.target.result;
-        let localImages = JSON.parse(localStorage.getItem('bmm_local_images') || '{}');
-        const key = 'local_res_' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.-]/g, '');
-        
-        try {
-            localImages[key] = dataUrl;
-            localStorage.setItem('bmm_local_images', JSON.stringify(localImages));
-            
-            // The URL input is the previous element sibling of the button, and the button is the previous sibling of this input
-            const urlInput = input.previousElementSibling.previousElementSibling;
-            if (urlInput) urlInput.value = key;
+    try {
+        const formData = new FormData();
+        const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        formData.append('file', file, safeFileName);
 
-            if (msg) {
-                msg.querySelector('div').innerText = `자료 업로드 완료! '저장' 버튼을 누르세요.`;
-                setTimeout(() => { msg.style.display = 'none'; }, 3000);
-            }
-        } catch (err) {
-            alert('저장 공간이 부족합니다. 용량이 큰 PDF(약 3MB 이상)는 로컬 환경에 업로드할 수 없습니다.');
-            if (msg) msg.style.display = 'none';
+        const res = await fetch(`${API_URL}/upload`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!res.ok) throw new Error(`서버 응답 오류: HTTP ${res.status}`);
+        const { url } = await res.json();
+
+        // The URL input is the previous element sibling of the button, and the button is the previous sibling of this input
+        const urlInput = input.previousElementSibling.previousElementSibling;
+        if (urlInput) {
+            urlInput.value = url;
         }
-    };
-    reader.readAsDataURL(file);
+
+        if (msg) {
+            msg.querySelector('div').innerText = `✅ 자료 업로드 완료! '변경사항 최종 저장하기' 버튼을 누르세요.`;
+            setTimeout(() => { msg.style.display = 'none'; }, 3000);
+        }
+    } catch (err) {
+        console.error('GCS Resource upload failed:', err);
+        alert('자료 업로드 실패: ' + err.message);
+        if (msg) msg.style.display = 'none';
+    }
 };
 
 // Firebase Storage 이미지 업로드 → Cloud Run → Google Cloud Storage
