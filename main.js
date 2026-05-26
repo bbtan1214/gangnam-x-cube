@@ -284,6 +284,7 @@ window.hallNav = (id) => {
  */
 window.resolveImageUrl = (url) => {
     if (!url) return url;
+    url = url.trim();
     if (url.startsWith('local_')) {
         try {
             const localImages = JSON.parse(localStorage.getItem('bmm_local_images') || '{}');
@@ -316,6 +317,9 @@ async function loadSiteContent() {
     }
     const hasSavedData = Object.keys(saved).length > 0;
     const content = hasSavedData ? { ...DEFAULT_CONTENT, ...saved } : { ...DEFAULT_CONTENT };
+    if (content.gallery) {
+        content.gallery = content.gallery.map(img => img.trim()).filter(Boolean);
+    }
     
     // Deep merge only when saved data exists but might be missing sub-fields
     if (hasSavedData) {
@@ -410,9 +414,9 @@ async function loadSiteContent() {
         const el = document.getElementById(id);
         if (el) {
             if (id === 'intro-main' || id === 'intro-sub') {
-                el.innerHTML = siEls[id].replace(/\n/g, '<br>');
+                el.innerHTML = (siEls[id] || '').replace(/\n/g, '<br>');
             } else {
-                el.innerText = siEls[id];
+                el.innerText = siEls[id] || '';
             }
         }
     }
@@ -421,12 +425,15 @@ async function loadSiteContent() {
     try {
         const gallery = document.getElementById('space-gallery');
         if (gallery && content.gallery) {
-            gallery.innerHTML = content.gallery.map(img => `
-                <div class="gallery-item-pill" data-src="${window.resolveImageUrl(img)}">
-                    <img src="${window.resolveImageUrl(img)}" alt="Gallery" onerror="this.src='https://placehold.co/600x400?text=No+Image'">
-                    <div class="item-hover-overlay"><span>VIEW</span></div>
-                </div>
-            `).join('');
+            gallery.innerHTML = content.gallery.map(img => {
+                const resolvedUrl = window.resolveImageUrl(img);
+                return `
+                    <div class="gallery-item-pill" data-src="${resolvedUrl}" onclick="window.openImageModal('${resolvedUrl}')">
+                        <img src="${resolvedUrl}" alt="Gallery" onerror="this.src='https://placehold.co/600x400?text=No+Image'">
+                        <div class="item-hover-overlay"><span>VIEW</span></div>
+                    </div>
+                `;
+            }).join('');
         }
         
         const noticeList = document.getElementById('main-notice-list');
@@ -1157,26 +1164,57 @@ window.initAdminStats = function() {
     render(list);
 }
 
-function initAdminLogin() {
+async function initAdminLogin() {
     const loginForm = document.getElementById('admin-login-form');
     if (!loginForm) return;
 
-    // Seed default account if none exists
-    let accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
-    if (accounts.length === 0) {
-        accounts = [{ id: 'admin', name: '최고 관리자', pw: 'bmm2026!', role: 'Master', lastLogin: '-' }];
-        localStorage.setItem('adminAccounts', JSON.stringify(accounts));
+    let accounts = [];
+    try {
+        const res = await fetch(`${API_URL}/admin/accounts`);
+        if (res.ok) {
+            accounts = await res.json();
+            localStorage.setItem('adminAccounts', JSON.stringify(accounts));
+        } else {
+            accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+        }
+    } catch (err) {
+        console.error('Failed to fetch admin accounts from API, using fallback:', err);
+        accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
     }
 
-    loginForm.onsubmit = (e) => {
+    if (accounts.length === 0) {
+        accounts = [{ id: 'admin', name: '최고 관리자', pw: 'bmm2026!', role: 'Master', lastLogin: '-' }];
+    }
+
+    loginForm.onsubmit = async (e) => {
         e.preventDefault();
         const id = document.getElementById('admin-id').value;
         const pw = document.getElementById('admin-pw').value;
         const errorMsg = document.getElementById('login-error');
 
+        // Fetch fresh accounts on submit
+        try {
+            const res = await fetch(`${API_URL}/admin/accounts`);
+            if (res.ok) {
+                accounts = await res.json();
+                localStorage.setItem('adminAccounts', JSON.stringify(accounts));
+            }
+        } catch (err) {
+            console.error('Failed to update admin accounts during login check:', err);
+        }
+
         const user = accounts.find(a => a.id === id && a.pw === pw);
         if (user) {
             user.lastLogin = new Date().toLocaleString();
+            try {
+                await fetch(`${API_URL}/admin/accounts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accounts })
+                });
+            } catch (err) {
+                console.error('Failed to update last login to server:', err);
+            }
             localStorage.setItem('adminAccounts', JSON.stringify(accounts));
             sessionStorage.setItem('adminLoggedIn', 'true');
             sessionStorage.setItem('adminUser', id);
@@ -1187,19 +1225,49 @@ function initAdminLogin() {
     };
 }
 
-window.initAdminSettingsAccounts = function() {
+window.initAdminSettingsAccounts = async function() {
     const listBody = document.getElementById('admin-account-list');
     if (!listBody) return;
 
-    // Ensure default admin account always exists
-    let storedAccounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
-    if (!storedAccounts.find(a => a.id === 'admin')) {
-        storedAccounts.unshift({ id: 'admin', name: '최고 관리자', pw: 'bmm2026!', role: 'Master', lastLogin: '-' });
-        localStorage.setItem('adminAccounts', JSON.stringify(storedAccounts));
-    }
+    let accounts = [];
+
+    const fetchAccounts = async () => {
+        try {
+            const res = await fetch(`${API_URL}/admin/accounts`);
+            if (res.ok) {
+                accounts = await res.json();
+                localStorage.setItem('adminAccounts', JSON.stringify(accounts));
+            } else {
+                accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+            }
+        } catch (err) {
+            console.error('Failed to fetch admin accounts:', err);
+            accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+        }
+        if (accounts.length === 0) {
+            accounts = [{ id: 'admin', name: '최고 관리자', pw: 'bmm2026!', role: 'Master', lastLogin: '-' }];
+        }
+    };
+
+    const saveAccountsToServer = async () => {
+        try {
+            const res = await fetch(`${API_URL}/admin/accounts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accounts })
+            });
+            if (res.ok) {
+                localStorage.setItem('adminAccounts', JSON.stringify(accounts));
+                return true;
+            }
+        } catch (err) {
+            console.error('Failed to save accounts to server:', err);
+        }
+        alert('⚠️ 서버 저장에 실패했습니다. 네트워크 연결 상태를 확인해 주세요.');
+        return false;
+    };
 
     const renderAccounts = () => {
-        const accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
         if (accounts.length === 0) {
             listBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#aaa;">등록된 계정이 없습니다.</td></tr>';
             return;
@@ -1222,7 +1290,7 @@ window.initAdminSettingsAccounts = function() {
         `).join('');
     };
 
-    // Show/hide add form - use boolean flag to avoid display string comparison issues
+    // Show/hide add form
     const addForm = document.getElementById('admin-add-form');
     const showAddBtn = document.getElementById('btn-show-add-admin');
     if (addForm && showAddBtn && !showAddBtn._bound) {
@@ -1237,7 +1305,7 @@ window.initAdminSettingsAccounts = function() {
     const saveNewBtn = document.getElementById('btn-save-new-admin');
     if (saveNewBtn && !saveNewBtn._bound) {
         saveNewBtn._bound = true;
-        saveNewBtn.onclick = () => {
+        saveNewBtn.onclick = async () => {
             const idEl = document.getElementById('new-admin-id');
             const nameEl = document.getElementById('new-admin-name');
             const phoneEl = document.getElementById('new-admin-phone');
@@ -1253,34 +1321,44 @@ window.initAdminSettingsAccounts = function() {
                 return;
             }
 
-            const accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
             if (accounts.find(a => a.id === id)) {
                 alert('이미 존재하는 아이디입니다.');
                 return;
             }
 
             accounts.push({ id, name, phone, pw, role: 'Staff', lastLogin: '-' });
-            localStorage.setItem('adminAccounts', JSON.stringify(accounts));
 
-            idEl.value = '';
-            nameEl.value = '';
-            phoneEl.value = '';
-            pwEl.value = '';
-            if (addForm) addForm.style.display = 'none';
-            alert(`✅ 계정 "${id}"이(가) 생성되었습니다.`);
-            renderAccounts();
+            const success = await saveAccountsToServer();
+            if (success) {
+                idEl.value = '';
+                nameEl.value = '';
+                phoneEl.value = '';
+                pwEl.value = '';
+                if (addForm) addForm.style.display = 'none';
+                alert(`✅ 계정 "${id}"이(가) 생성되었습니다.`);
+                renderAccounts();
+            } else {
+                accounts.pop();
+            }
         };
     }
 
-    window.deleteAdminAccount = (idx) => {
-        const accounts = JSON.parse(localStorage.getItem('adminAccounts') || '[]');
+    window.deleteAdminAccount = async (idx) => {
         if (!accounts[idx]) return;
-        if (!confirm(`계정 "${accounts[idx].id}"을(를) 삭제하시겠습니까?`)) return;
-        accounts.splice(idx, 1);
-        localStorage.setItem('adminAccounts', JSON.stringify(accounts));
-        renderAccounts();
+        const targetId = accounts[idx].id;
+        if (!confirm(`계정 "${targetId}"을(를) 삭제하시겠습니까?`)) return;
+
+        const deletedAccount = accounts.splice(idx, 1)[0];
+
+        const success = await saveAccountsToServer();
+        if (success) {
+            renderAccounts();
+        } else {
+            accounts.splice(idx, 0, deletedAccount);
+        }
     };
 
+    await fetchAccounts();
     renderAccounts();
 }
 
@@ -1303,6 +1381,9 @@ window.initCMS = async function() {
         saved = JSON.parse(localStorage.getItem('siteContent_v3') || '{}');
     }
     const content = { ...window.DEFAULT_CONTENT, ...saved };
+    if (content.gallery) {
+        content.gallery = content.gallery.map(img => img.trim()).filter(Boolean);
+    }
     
     // Deep merge for nested fields
     content.halls = saved.halls ? { ...window.DEFAULT_CONTENT.halls, ...saved.halls } : window.DEFAULT_CONTENT.halls;
@@ -1397,8 +1478,8 @@ window.initCMS = async function() {
                 newContent.halls[id].cap = document.getElementById(`${p}-cap`).value;
                 newContent.halls[id].height = document.getElementById(`${p}-height`).value;
             });
-            newContent.gallery = document.getElementById('cms-gallery-urls').value.split('\n').filter(l => l.trim());
-            newContent.heroImg = document.getElementById('cms-hero-img').value;
+            newContent.gallery = document.getElementById('cms-gallery-urls').value.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+            newContent.heroImg = document.getElementById('cms-hero-img').value.trim();
 
             newContent.contact = {
                 address: document.getElementById('cms-contact-address').value,
@@ -1458,10 +1539,10 @@ window.initCMS = async function() {
         if (!galleryPreview) return;
         const textarea = document.getElementById('cms-gallery-urls');
         if (!textarea) return;
-        const urls = textarea.value.split('\n').filter(u => u.trim());
+        const urls = textarea.value.split(/\r?\n/).map(u => u.trim()).filter(Boolean);
         galleryPreview.innerHTML = urls.length > 0 ? urls.map((url, i) => `
             <div style="position:relative; border-radius:8px; overflow:hidden; border:1px solid #eee; aspect-ratio:1; background:#f5f5f5;">
-                <img src="${window.resolveImageUrl(url.trim())}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://placehold.co/150x150?text=Error'">
+                <img src="${window.resolveImageUrl(url)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://placehold.co/150x150?text=Error'">
                 <button onclick="window.removeGalleryImage(${i})" style="position:absolute; top:4px; right:4px; width:24px; height:24px; border-radius:50%; border:none; background:rgba(0,0,0,0.6); color:#fff; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;">×</button>
             </div>
         `).join('') : '<div style="grid-column:1/-1; text-align:center; padding:30px; color:#ccc;">이미지를 업로드하거나 URL을 추가하세요</div>';
@@ -1470,7 +1551,7 @@ window.initCMS = async function() {
     window.removeGalleryImage = (idx) => {
         const textarea = document.getElementById('cms-gallery-urls');
         if (!textarea) return;
-        const urls = textarea.value.split('\n').filter(u => u.trim());
+        const urls = textarea.value.split(/\r?\n/).map(u => u.trim()).filter(Boolean);
         urls.splice(idx, 1);
         textarea.value = urls.join('\n');
         renderGalleryPreview();
@@ -1508,27 +1589,45 @@ window.initCMS = async function() {
         };
     }
 
-    function handleGalleryUpload(files) {
+    async function handleGalleryUpload(files) {
         const textarea = document.getElementById('cms-gallery-urls');
         if (!textarea) return;
         const msg = document.getElementById('msg-box');
         if (msg) { msg.querySelector('div').innerText = '갤러리 이미지 처리 중...'; msg.style.display = 'block'; }
-        let processed = 0;
+        
         let keys = [];
-        for (let i = 0; i < files.length; i++) {
-            if (!files[i].type.startsWith('image/')) { processed++; continue; }
-            window.processImageUpload(files[i], (key) => {
-                keys.push(key);
-                processed++;
-                if (processed === files.length) {
-                    const cur = textarea.value.trim();
-                    textarea.value = cur ? cur + '\n' + keys.join('\n') : keys.join('\n');
-                    renderGalleryPreview();
-                    if (msg) { msg.querySelector('div').innerText = `✅ ${keys.length}개 이미지 업로드 완료! [저장] 버튼을 눌러 확정하세요.`; setTimeout(() => { msg.style.display = 'none'; }, 4000); }
-                    galleryFileInput.value = '';
+        let failedCount = 0;
+        let validImageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+        
+        for (let i = 0; i < validImageFiles.length; i++) {
+            const file = validImageFiles[i];
+            try {
+                if (msg) {
+                    msg.querySelector('div').innerText = `☁️ [${i+1}/${validImageFiles.length}] 이미지 업로드 중...`;
                 }
-            });
+                const url = await window.processImageUpload(file);
+                keys.push(url);
+            } catch (err) {
+                console.error(`이미지 ${i+1} 업로드 실패:`, err);
+                failedCount++;
+            }
         }
+        
+        if (keys.length > 0) {
+            const cur = textarea.value.trim();
+            textarea.value = cur ? cur + '\n' + keys.join('\n') : keys.join('\n');
+            renderGalleryPreview();
+        }
+        
+        if (msg) {
+            if (failedCount > 0) {
+                msg.querySelector('div').innerText = `⚠️ ${keys.length}개 업로드 성공, ${failedCount}개 실패. [변경사항 최종 저장하기]를 눌러 저장하세요.`;
+            } else {
+                msg.querySelector('div').innerText = `✅ ${keys.length}개 이미지 업로드 완료! [변경사항 최종 저장하기]를 눌러 저장하세요.`;
+            }
+            setTimeout(() => { msg.style.display = 'none'; }, 5000);
+        }
+        galleryFileInput.value = '';
     }
 
     // === Hero Image Upload Logic ===
@@ -1649,7 +1748,8 @@ window.processImageUpload = async (file, callback) => {
         const { url } = await res.json();
 
         if (msg) { msg.querySelector('div').innerText = '✅ Google Cloud Storage 업로드 완료! [저장] 버튼으로 확정하세요.'; setTimeout(() => { msg.style.display = 'none'; }, 5000); }
-        callback(url);
+        if (typeof callback === 'function') callback(url);
+        return url;
 
     } catch (err) {
         console.error('GCS 업로드 실패:', err);
@@ -1657,6 +1757,7 @@ window.processImageUpload = async (file, callback) => {
             msg.querySelector('div').innerHTML = `❌ <strong>업로드 실패</strong><br><small>${err.message}</small>`;
             msg.style.display = 'block';
         }
+        throw err;
     }
 };
 
@@ -2108,7 +2209,7 @@ function renderContactInfo() {
         const el = document.getElementById(id);
         if (el) {
             if (id === 'contact-hours') {
-                el.innerHTML = els[id].replace(/\n/g, '<br>');
+                el.innerHTML = (els[id] || '').replace(/\n/g, '<br>');
             } else if (id === 'contact-instagram') {
                 el.href = els[id] || '#';
                 if (els[id]) {
@@ -2118,7 +2219,7 @@ function renderContactInfo() {
                     el.style.display = 'none';
                 }
             } else {
-                el.innerText = els[id];
+                el.innerText = els[id] || '';
             }
         }
     }

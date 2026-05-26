@@ -271,6 +271,51 @@ app.delete('/inquiries/:id', async (req, res) => {
     }
 });
 
+
+// ─────────────────────────────────────────────
+// 어드민 계정 관리 (Firestore: settings/adminAccounts)
+// ─────────────────────────────────────────────
+app.get('/admin/accounts', async (req, res) => {
+    try {
+        const docRef = db.collection('settings').doc('adminAccounts');
+        const snap = await docRef.get();
+        if (!snap.exists) {
+            const defaultAccounts = [{ id: 'admin', name: '최고 관리자', pw: 'bmm2026!', role: 'Master', lastLogin: '-' }];
+            await docRef.set({ accounts: defaultAccounts });
+            return res.json(defaultAccounts);
+        }
+        const data = snap.data();
+        let accounts = data.accounts || [];
+        // Ensure default admin account always exists
+        if (!accounts.find(a => a.id === 'admin')) {
+            accounts.unshift({ id: 'admin', name: '최고 관리자', pw: 'bmm2026!', role: 'Master', lastLogin: '-' });
+            await docRef.set({ accounts });
+        }
+        res.json(accounts);
+    } catch (err) {
+        console.error('admin accounts GET 오류:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/admin/accounts', async (req, res) => {
+    try {
+        const { accounts } = req.body;
+        if (!Array.isArray(accounts)) {
+            return res.status(400).json({ error: 'accounts must be an array' });
+        }
+        // Ensure default admin account always exists in the array
+        if (!accounts.find(a => a.id === 'admin')) {
+            accounts.unshift({ id: 'admin', name: '최고 관리자', pw: 'bmm2026!', role: 'Master', lastLogin: '-' });
+        }
+        await db.collection('settings').doc('adminAccounts').set({ accounts });
+        res.json({ ok: true });
+    } catch (err) {
+        console.error('admin accounts POST 오류:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 GANGNAM X CUBE API 실행 중 (포트 ${PORT})`);
 });
