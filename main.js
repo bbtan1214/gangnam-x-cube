@@ -304,7 +304,7 @@ async function loadSiteContent() {
     // Firestore REST API 로드 (Cloud Run 경유)
     let saved = {};
     try {
-        const res = await fetch(`${API_URL}/content`);
+        const res = await fetch(`${API_URL}/content?t=${Date.now()}`);
         if (res.ok) {
             saved = await res.json();
             // 캐시: localStorage 동기화
@@ -1370,7 +1370,7 @@ window.initCMS = async function() {
     // Always fetch latest from cloud to avoid stale data overwriting saved values
     let saved = {};
     try {
-        const res = await fetch(`${API_URL}/content`);
+        const res = await fetch(`${API_URL}/content?t=${Date.now()}`);
         if (res.ok) {
             saved = await res.json();
             localStorage.setItem('siteContent_v3', JSON.stringify(saved));
